@@ -36,7 +36,8 @@ class RecipeDetailPage extends StatelessWidget {
     final duplicated = Map<String, dynamic>.from(recipe)
       ..['id'] = DateTime.now().millisecondsSinceEpoch.toString()
       ..['name'] = '${(recipe['name'] ?? 'Untitled recipe')} (Copy)'
-      ..['createdAt'] = DateTime.now().toIso8601String();
+      ..['createdAt'] = DateTime.now().toIso8601String()
+      ..['updatedAt'] = DateTime.now().toIso8601String();
 
     storedRecipes.insert(0, jsonEncode(duplicated));
     await prefs.setStringList('saved_recipes', storedRecipes);
@@ -99,7 +100,7 @@ class RecipeDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Review the full saved costing and reopen it in the calculator.',
+            'Review the full saved costing and update it from the calculator.',
             style: TextStyle(
               color: AppTheme.textMuted,
               height: 1.5,
@@ -210,8 +211,8 @@ class RecipeDetailPage extends StatelessWidget {
               onOpenInCalculator(recipe);
               Navigator.of(context).pop();
             },
-            icon: const Icon(Icons.calculate),
-            label: const Text('Open in calculator'),
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Edit recipe'),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(

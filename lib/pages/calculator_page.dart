@@ -29,6 +29,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   String _selectedCurrencyCode = 'USD';
   bool _isSaving = false;
+  String? _editingRecipeId;
+  DateTime? _loadedAt;
 
   final List<_CurrencyOption> _currencies = const [
     _CurrencyOption(code: 'USD', symbol: '\$'),
@@ -47,6 +49,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
   final List<TextInputFormatter> _integerInputFormatters = [
     FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
   ];
+
+  bool get isEditingExistingRecipe => _editingRecipeId != null;
 
   @override
   void initState() {
@@ -126,6 +130,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
     _servingsController.text = '1';
     _sellingPriceController.text = '0';
     _selectedCurrencyCode = 'USD';
+    _editingRecipeId = null;
+    _loadedAt = null;
 
     for (final ingredient in _ingredients) {
       ingredient.dispose();
@@ -142,14 +148,20 @@ class _CalculatorPageState extends State<CalculatorPage> {
     setState(() {
       _clearForm();
 
+      _editingRecipeId = recipe['id']?.toString();
+      final createdAtRaw = recipe['createdAt']?.toString();
+      if (createdAtRaw != null && createdAtRaw.isNotEmpty) {
+        _loadedAt = DateTime.tryParse(createdAtRaw);
+      }
+
       _recipeNameController.text = (recipe['name'] ?? '').toString();
       _selectedCurrencyCode = (recipe['currencyCode'] ?? 'USD').toString();
       _servingsController.text = (recipe['servings'] ?? 1).toString();
 
-      final sellingPrice = (recipe['sellingPricePerDish'] as num?)?.toDouble() ?? 0;
-      _sellingPriceController.text = sellingPrice == 0
-          ? '0'
-          : sellingPrice.toStringAsFixed(2);
+      final sellingPrice =
+          (recipe['sellingPricePerDish'] as num?)?.toDouble() ?? 0;
+      _sellingPriceController.text =
+          sellingPrice == 0 ? '0' : sellingPrice.toStringAsFixed(2);
 
       _ingredients.clear();
 
@@ -259,8 +271,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
       final prefs = await SharedPreferences.getInstance();
       final existing = prefs.getStringList('saved_recipes') ?? [];
 
+      final recipeId =
+          _editingRecipeId ?? DateTime.now().millisecondsSinceEpoch.toString();
+
       final recipe = {
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'id': recipeId,
         'name': _recipeName,
         'currencyCode': selectedCurrency.code,
         'currencySymbol': selectedCurrency.symbol,
@@ -269,7 +284,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
         'totalCost': totalCost,
         'costPerServing': costPerServing,
         'foodCostPercent': foodCostPercent,
-        'createdAt': DateTime.now().toIso8601String(),
+        'createdAt': (_loadedAt ?? DateTime.now()).toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
         'ingredients': validIngredients
             .map(
               (ingredient) => {
@@ -283,13 +299,33 @@ class _CalculatorPageState extends State<CalculatorPage> {
             .toList(),
       };
 
-      existing.insert(0, jsonEncode(recipe));
+      final encodedRecipe = jsonEncode(recipe);
+
+      if (_editingRecipeId != null) {
+        final index = existing.indexWhere((item) {
+          final decoded = jsonDecode(item) as Map<String, dynamic>;
+          return decoded['id'].toString() == _editingRecipeId;
+        });
+
+        if (index >= 0) {
+          existing[index] = encodedRecipe;
+        } else {
+          existing.insert(0, encodedRecipe);
+        }
+      } else {
+        existing.insert(0, encodedRecipe);
+      }
+
       await prefs.setStringList('saved_recipes', existing);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Recipe saved successfully.'),
+        SnackBar(
+          content: Text(
+            isEditingExistingRecipe
+                ? 'Recipe updated successfully.'
+                : 'Recipe saved successfully.',
+          ),
         ),
       );
     } finally {
@@ -308,18 +344,20 @@ class _CalculatorPageState extends State<CalculatorPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
       children: [
-        const Text(
-          'Calculator',
-          style: TextStyle(
+        Text(
+          isEditingExistingRecipe ? 'Edit Recipe' : 'Calculator',
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Build a quick recipe costing calculation.',
-          style: TextStyle(
+        Text(
+          isEditingExistingRecipe
+              ? 'Update the saved recipe and overwrite the existing version.'
+              : 'Build a quick recipe costing calculation.',
+          style: const TextStyle(
             color: AppTheme.textMuted,
             height: 1.5,
           ),
@@ -574,8 +612,18 @@ class _CalculatorPageState extends State<CalculatorPage> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.save_outlined),
-                  label: Text(_isSaving ? 'Saving...' : 'Save recipe'),
+                      : Icon(
+                          isEditingExistingRecipe
+                              ? Icons.check_circle_outline
+                              : Icons.save_outlined,
+                        ),
+                  label: Text(
+                    _isSaving
+                        ? (isEditingExistingRecipe ? 'Updating...' : 'Saving...')
+                        : (isEditingExistingRecipe
+                            ? 'Update recipe'
+                            : 'Save recipe'),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
