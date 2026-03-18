@@ -1,7 +1,6 @@
 name: food_cost_calculator
-description: "A new Flutter project."
+description: "Recipe costing and food cost calculator for chefs, restaurants and food businesses."
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
@@ -10,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.2.3
   url_launcher: ^6.3.0
@@ -18,7 +16,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^6.0.0
 
 flutter:
