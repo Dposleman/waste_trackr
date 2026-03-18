@@ -1,12 +1,20 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../app_theme.dart';
-import '../widgets/app_card.dart';
 import '../utils/external_links.dart';
+import '../widgets/app_card.dart';
+import 'recipe_detail_page.dart';
 
 class SavedRecipesPage extends StatefulWidget {
-  const SavedRecipesPage({super.key});
+  const SavedRecipesPage({
+    super.key,
+    required this.onOpenInCalculator,
+  });
+
+  final ValueChanged<Map<String, dynamic>> onOpenInCalculator;
 
   @override
   State<SavedRecipesPage> createState() => _SavedRecipesPageState();
@@ -31,7 +39,7 @@ class _SavedRecipesPageState extends State<SavedRecipesPage> {
     final storedRecipes = prefs.getStringList('saved_recipes') ?? [];
 
     final parsed = storedRecipes
-        .map((item) => jsonDecode(item) as Map<String, dynamic>)
+        .map((item) => Map<String, dynamic>.from(jsonDecode(item) as Map))
         .toList();
 
     if (!mounted) return;
@@ -48,7 +56,7 @@ class _SavedRecipesPageState extends State<SavedRecipesPage> {
 
     storedRecipes.removeWhere((item) {
       final decoded = jsonDecode(item) as Map<String, dynamic>;
-      return decoded['id'] == id;
+      return decoded['id'].toString() == id;
     });
 
     await prefs.setStringList('saved_recipes', storedRecipes);
@@ -70,6 +78,20 @@ class _SavedRecipesPageState extends State<SavedRecipesPage> {
     }
 
     return '$currencySymbol$formatted';
+  }
+
+  Future<void> _openRecipeDetail(Map<String, dynamic> recipe) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RecipeDetailPage(
+          recipe: recipe,
+          onOpenInCalculator: widget.onOpenInCalculator,
+          onRecipeDeleted: _loadRecipes,
+        ),
+      ),
+    );
+
+    await _loadRecipes();
   }
 
   @override
@@ -137,7 +159,10 @@ class _SavedRecipesPageState extends State<SavedRecipesPage> {
               children: [
                 const Text(
                   'Upgrade path',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 const Text(
@@ -170,46 +195,71 @@ class _SavedRecipesPageState extends State<SavedRecipesPage> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: AppCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => _openRecipeDetail(recipe),
+                  child: Padding(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                             ),
+                            IconButton(
+                              onPressed: () => _deleteRecipe(id),
+                              icon: const Icon(Icons.delete_outline),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        _RecipeInfoRow(label: 'Currency', value: currencyCode),
+                        _RecipeInfoRow(label: 'Servings', value: servings),
+                        _RecipeInfoRow(
+                          label: 'Total cost',
+                          value: _money(currencyCode, currencySymbol, totalCost),
+                        ),
+                        _RecipeInfoRow(
+                          label: 'Cost per serving',
+                          value: _money(
+                            currencyCode,
+                            currencySymbol,
+                            costPerServing,
                           ),
                         ),
-                        IconButton(
-                          onPressed: () => _deleteRecipe(id),
-                          icon: const Icon(Icons.delete_outline),
+                        _RecipeInfoRow(
+                          label: 'Food cost %',
+                          value: '${foodCostPercent.toStringAsFixed(1)}%',
+                        ),
+                        const SizedBox(height: 10),
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.open_in_new,
+                              size: 16,
+                              color: AppTheme.textMuted,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Tap to view details',
+                              style: TextStyle(
+                                color: AppTheme.textMuted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    _RecipeInfoRow(label: 'Currency', value: currencyCode),
-                    _RecipeInfoRow(label: 'Servings', value: servings),
-                    _RecipeInfoRow(
-                      label: 'Total cost',
-                      value: _money(currencyCode, currencySymbol, totalCost),
-                    ),
-                    _RecipeInfoRow(
-                      label: 'Cost per serving',
-                      value: _money(
-                        currencyCode,
-                        currencySymbol,
-                        costPerServing,
-                      ),
-                    ),
-                    _RecipeInfoRow(
-                      label: 'Food cost %',
-                      value: '${foodCostPercent.toStringAsFixed(1)}%',
-                    ),
-                  ],
+                  ),
                 ),
               ),
             );
@@ -246,13 +296,13 @@ class _SavedRecipesPageState extends State<SavedRecipesPage> {
 }
 
 class _RecipeInfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
   const _RecipeInfoRow({
     required this.label,
     required this.value,
   });
+
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {

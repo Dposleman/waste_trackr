@@ -9,7 +9,12 @@ import '../utils/external_links.dart';
 import '../widgets/app_card.dart';
 
 class CalculatorPage extends StatefulWidget {
-  const CalculatorPage({super.key});
+  const CalculatorPage({
+    super.key,
+    this.initialRecipe,
+  });
+
+  final Map<String, dynamic>? initialRecipe;
 
   @override
   State<CalculatorPage> createState() => _CalculatorPageState();
@@ -44,13 +49,25 @@ class _CalculatorPageState extends State<CalculatorPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialRecipe != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadRecipeIntoForm(widget.initialRecipe!);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _recipeNameController.dispose();
     _servingsController.dispose();
     _sellingPriceController.dispose();
+
     for (final ingredient in _ingredients) {
       ingredient.dispose();
     }
+
     super.dispose();
   }
 
@@ -96,12 +113,63 @@ class _CalculatorPageState extends State<CalculatorPage> {
   String get _currencyPrefix {
     return selectedCurrency.code == 'DKK'
         ? 'DKK '
-        : selectedCurrency.symbol;
+        : '${selectedCurrency.symbol}';
   }
 
   String get _recipeName {
     final value = _recipeNameController.text.trim();
     return value.isEmpty ? 'Untitled recipe' : value;
+  }
+
+  void _clearForm() {
+    _recipeNameController.text = '';
+    _servingsController.text = '1';
+    _sellingPriceController.text = '0';
+    _selectedCurrencyCode = 'USD';
+
+    for (final ingredient in _ingredients) {
+      ingredient.dispose();
+    }
+    _ingredients
+      ..clear()
+      ..add(IngredientRowData());
+  }
+
+  void _loadRecipeIntoForm(Map<String, dynamic> recipe) {
+    final ingredients =
+        (recipe['ingredients'] as List<dynamic>? ?? const <dynamic>[]);
+
+    setState(() {
+      _clearForm();
+
+      _recipeNameController.text = (recipe['name'] ?? '').toString();
+      _selectedCurrencyCode = (recipe['currencyCode'] ?? 'USD').toString();
+      _servingsController.text = (recipe['servings'] ?? 1).toString();
+
+      final sellingPrice = (recipe['sellingPricePerDish'] as num?)?.toDouble() ?? 0;
+      _sellingPriceController.text = sellingPrice == 0
+          ? '0'
+          : sellingPrice.toStringAsFixed(2);
+
+      _ingredients.clear();
+
+      if (ingredients.isEmpty) {
+        _ingredients.add(IngredientRowData());
+      } else {
+        for (final item in ingredients) {
+          final map = Map<String, dynamic>.from(item as Map);
+          _ingredients.add(
+            IngredientRowData.fromMap(map),
+          );
+        }
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Recipe loaded into calculator.'),
+      ),
+    );
   }
 
   void _addIngredient() {
@@ -112,6 +180,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   void _removeIngredient(int index) {
     if (_ingredients.length == 1) return;
+
     setState(() {
       _ingredients[index].dispose();
       _ingredients.removeAt(index);
@@ -202,13 +271,15 @@ class _CalculatorPageState extends State<CalculatorPage> {
         'foodCostPercent': foodCostPercent,
         'createdAt': DateTime.now().toIso8601String(),
         'ingredients': validIngredients
-            .map((ingredient) => {
-                  'name': ingredient.nameController.text.trim(),
-                  'unit': ingredient.unitController.text.trim(),
-                  'unitPrice': ingredient.unitPrice,
-                  'quantity': ingredient.quantity,
-                  'totalCost': ingredient.totalCost,
-                })
+            .map(
+              (ingredient) => {
+                'name': ingredient.nameController.text.trim(),
+                'unit': ingredient.unitController.text.trim(),
+                'unitPrice': ingredient.unitPrice,
+                'quantity': ingredient.quantity,
+                'totalCost': ingredient.totalCost,
+              },
+            )
             .toList(),
       };
 
@@ -216,7 +287,6 @@ class _CalculatorPageState extends State<CalculatorPage> {
       await prefs.setStringList('saved_recipes', existing);
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Recipe saved successfully.'),
@@ -320,11 +390,15 @@ class _CalculatorPageState extends State<CalculatorPage> {
         const SizedBox(height: 16),
         const Text(
           'Ingredients',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 12),
         ...List.generate(_ingredients.length, (index) {
           final ingredient = _ingredients[index];
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: AppCard(
@@ -428,13 +502,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
             children: [
               const Text(
                 'Results',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 16),
-              _ResultRow(
-                label: 'Recipe',
-                value: _recipeName,
-              ),
+              _ResultRow(label: 'Recipe', value: _recipeName),
               _ResultRow(label: 'Currency', value: selectedCurrency.code),
               _ResultRow(label: 'Total cost', value: _money(totalCost)),
               _ResultRow(
@@ -452,7 +526,9 @@ class _CalculatorPageState extends State<CalculatorPage> {
                 decoration: BoxDecoration(
                   color: status.background,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: status.color.withOpacity(0.45)),
+                  border: Border.all(
+                    color: status.color.withOpacity(0.45),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,12 +595,32 @@ class _CalculatorPageState extends State<CalculatorPage> {
 }
 
 class IngredientRowData {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController unitController = TextEditingController();
-  final TextEditingController unitPriceController =
-      TextEditingController(text: '0');
-  final TextEditingController quantityController =
-      TextEditingController(text: '0');
+  IngredientRowData({
+    String name = '',
+    String unit = '',
+    String unitPrice = '0',
+    String quantity = '0',
+  })  : nameController = TextEditingController(text: name),
+        unitController = TextEditingController(text: unit),
+        unitPriceController = TextEditingController(text: unitPrice),
+        quantityController = TextEditingController(text: quantity);
+
+  factory IngredientRowData.fromMap(Map<String, dynamic> map) {
+    final unitPrice = (map['unitPrice'] as num?)?.toDouble() ?? 0;
+    final quantity = (map['quantity'] as num?)?.toDouble() ?? 0;
+
+    return IngredientRowData(
+      name: (map['name'] ?? '').toString(),
+      unit: (map['unit'] ?? '').toString(),
+      unitPrice: unitPrice == 0 ? '0' : unitPrice.toStringAsFixed(2),
+      quantity: quantity == 0 ? '0' : quantity.toString(),
+    );
+  }
+
+  final TextEditingController nameController;
+  final TextEditingController unitController;
+  final TextEditingController unitPriceController;
+  final TextEditingController quantityController;
 
   double _parseNumber(String value) {
     final normalized = value.trim().replaceAll(' ', '').replaceAll(',', '.');
@@ -568,13 +664,13 @@ class _FoodCostStatus {
 }
 
 class _ResultRow extends StatelessWidget {
-  final String label;
-  final String value;
-
   const _ResultRow({
     required this.label,
     required this.value,
   });
+
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
