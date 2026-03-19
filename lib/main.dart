@@ -34,46 +34,74 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
   Map<String, dynamic>? _recipeToOpenInCalculator;
-  int _calculatorKey = 0;
+  int _calculatorSeed = 0;
 
   void _openRecipeInCalculator(Map<String, dynamic> recipe) {
     setState(() {
-      _recipeToOpenInCalculator = recipe;
-      _calculatorKey++;
+      _recipeToOpenInCalculator = Map<String, dynamic>.from(recipe);
+      _calculatorSeed++;
       _currentIndex = 1;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      const HomePage(),
+      CalculatorPage(
+        key: ValueKey('calculator_$_calculatorSeed'),
+        initialRecipe: _recipeToOpenInCalculator,
+      ),
+      SavedRecipesPage(
+        onOpenInCalculator: _openRecipeInCalculator,
+      ),
+      const SettingsPage(),
+    ];
+
     return Scaffold(
       body: Stack(
         children: [
           const _PremiumBackground(),
           SafeArea(
+            bottom: false,
             child: IndexedStack(
               index: _currentIndex,
-              children: [
-                const HomePage(),
-                CalculatorPage(
-                  key: ValueKey(_calculatorKey),
-                  initialRecipe: _recipeToOpenInCalculator,
-                ),
-                SavedRecipesPage(
-                  onOpenInCalculator: _openRecipeInCalculator,
-                ),
-                const SettingsPage(),
-              ],
+              children: pages,
             ),
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: AppTheme.border.withOpacity(0.85),
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xF0101E39),
+              const Color(0xF0000717),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.34),
+              blurRadius: 22,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(28),
           child: NavigationBar(
             selectedIndex: _currentIndex,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            labelBehavior:
+                NavigationDestinationLabelBehavior.onlyShowSelected,
             onDestinationSelected: (index) {
               setState(() => _currentIndex = index);
             },
@@ -111,74 +139,49 @@ class _PremiumBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topLeft,
+          radius: 1.35,
+          colors: [
+            Color(0xFF0D2450),
+            Color(0xFF071226),
+            Color(0xFF040914),
+          ],
+          stops: [0.0, 0.52, 1.0],
+        ),
+      ),
       child: Stack(
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF030816),
-                  Color(0xFF071225),
-                  Color(0xFF081A30),
-                  Color(0xFF050D1E),
-                ],
-                stops: [0.0, 0.28, 0.72, 1.0],
-              ),
-            ),
-          ),
-          const Positioned(
-            top: -110,
-            left: -90,
-            child: _GlowOrb(
-              size: 280,
-              color: Color(0xFF2563FF),
-              opacity: 0.16,
-            ),
-          ),
-          const Positioned(
-            top: 110,
-            right: -80,
-            child: _GlowOrb(
-              size: 250,
-              color: Color(0xFF22D3EE),
-              opacity: 0.10,
-            ),
-          ),
-          const Positioned(
-            bottom: 110,
+          Positioned(
+            top: -90,
             left: -70,
-            child: _GlowOrb(
-              size: 240,
-              color: Color(0xFF7C3AED),
-              opacity: 0.10,
+            child: _glow(
+              size: 220,
+              color: AppTheme.primary.withOpacity(0.18),
             ),
           ),
-          const Positioned(
-            bottom: -60,
-            right: -40,
-            child: _GlowOrb(
-              size: 220,
-              color: Color(0xFF3B82F6),
-              opacity: 0.08,
+          Positioned(
+            top: 120,
+            right: -70,
+            child: _glow(
+              size: 200,
+              color: AppTheme.cyan.withOpacity(0.10),
+            ),
+          ),
+          Positioned(
+            bottom: 100,
+            left: -60,
+            child: _glow(
+              size: 180,
+              color: AppTheme.violet.withOpacity(0.10),
             ),
           ),
           Positioned.fill(
             child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withOpacity(0.012),
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.10),
-                    ],
-                  ),
-                ),
+              child: CustomPaint(
+                painter: _BackgroundPainter(),
               ),
             ),
           ),
@@ -186,37 +189,69 @@ class _PremiumBackground extends StatelessWidget {
       ),
     );
   }
-}
 
-class _GlowOrb extends StatelessWidget {
-  final double size;
-  final Color color;
-  final double opacity;
-
-  const _GlowOrb({
-    required this.size,
-    required this.color,
-    required this.opacity,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withOpacity(opacity),
-              color.withOpacity(opacity * 0.52),
-              color.withOpacity(0),
-            ],
-            stops: const [0, 0.42, 1],
+  Widget _glow({required double size, required Color color}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color,
+            blurRadius: 90,
+            spreadRadius: 18,
           ),
-        ),
+        ],
       ),
     );
   }
+}
+
+class _BackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint1 = Paint()
+      ..color = AppTheme.primary.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    final paint2 = Paint()
+      ..color = AppTheme.cyan.withOpacity(0.04)
+      ..style = PaintingStyle.fill;
+
+    final paint3 = Paint()
+      ..color = Colors.white.withOpacity(0.025)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final path1 = Path()
+      ..moveTo(size.width * 0.72, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height * 0.25)
+      ..close();
+
+    final path2 = Path()
+      ..moveTo(0, size.height * 0.55)
+      ..lineTo(size.width * 0.22, size.height * 0.46)
+      ..lineTo(size.width * 0.16, size.height * 0.72)
+      ..close();
+
+    canvas.drawPath(path1, paint1);
+    canvas.drawPath(path2, paint2);
+
+    canvas.drawLine(
+      Offset(size.width * 0.08, size.height * 0.16),
+      Offset(size.width * 0.92, size.height * 0.16),
+      paint3,
+    );
+
+    canvas.drawLine(
+      Offset(size.width * 0.12, size.height * 0.52),
+      Offset(size.width * 0.88, size.height * 0.52),
+      paint3..color = Colors.white.withOpacity(0.018),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
