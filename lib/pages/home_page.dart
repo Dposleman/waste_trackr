@@ -54,9 +54,9 @@ class _HomePageState extends State<HomePage> {
             final wide = constraints.maxWidth >= 920;
 
             if (wide) {
-              return Row(
+              return const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Expanded(
                     flex: 11,
                     child: _WhatItDoesCard(),
@@ -85,9 +85,9 @@ class _HomePageState extends State<HomePage> {
             final wide = constraints.maxWidth >= 920;
 
             if (wide) {
-              return Row(
+              return const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Expanded(
                     flex: 10,
                     child: _WorkflowCard(),
@@ -124,94 +124,100 @@ class _HomeHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isCompact = width < 640;
     final parallax = math.min(scrollOffset * 0.18, 18.0);
 
     return AppCard(
       padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
-      child: SizedBox(
-        height: 232,
-        child: Stack(
-          children: [
-            Positioned(
-              right: -18,
-              top: -18 + parallax,
-              child: IgnorePointer(
-                child: Opacity(
-                  opacity: 0.12,
-                  child: Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          const Color(0xFF53D4FF).withOpacity(0.22),
-                          const Color(0xFF7B61FF).withOpacity(0.12),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 8,
-              top: 18 + (parallax * 0.55),
-              child: IgnorePointer(
+      child: Stack(
+        children: [
+          Positioned(
+            right: -18,
+            top: -18 + parallax,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.12,
                 child: Container(
-                  width: 76,
-                  height: 76,
+                  width: 140,
+                  height: 140,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
                       colors: [
-                        Color(0xFF53D4FF),
-                        Color(0xFF6AA8FF),
+                        const Color(0xFF53D4FF).withOpacity(0.22),
+                        const Color(0xFF7B61FF).withOpacity(0.12),
+                        Colors.transparent,
                       ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF58C8FF).withOpacity(0.24),
-                        blurRadius: 26,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.calculate_rounded,
-                    size: 34,
-                    color: Colors.white,
                   ),
                 ),
               ),
             ),
-            const Positioned(
-              right: 22,
-              bottom: 16,
-              child: _HeroMiniPanel(),
+          ),
+          Positioned(
+            right: 8,
+            top: 18 + (parallax * 0.55),
+            child: IgnorePointer(
+              child: Container(
+                width: isCompact ? 64 : 76,
+                height: isCompact ? 64 : 76,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF53D4FF),
+                      Color(0xFF6AA8FF),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF58C8FF).withOpacity(0.24),
+                      blurRadius: 26,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.calculate_rounded,
+                  size: isCompact ? 30 : 34,
+                  color: Colors.white,
+                ),
+              ),
             ),
-            Column(
+          ),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: isCompact ? 300 : 232,
+            ),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const _HeroTag(label: 'UnderStack utility app'),
                 const SizedBox(height: 16),
-                const Text(
-                  'Fast recipe costing for chefs, kitchens and food businesses.',
-                  style: TextStyle(
-                    fontSize: 28,
-                    height: 1.12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.7,
-                    color: AppTheme.textPrimary,
+                Padding(
+                  padding: EdgeInsets.only(
+                    right: isCompact ? 88 : 126,
+                  ),
+                  child: Text(
+                    'Fast recipe costing for chefs, kitchens and food businesses.',
+                    style: TextStyle(
+                      fontSize: isCompact ? 24 : 28,
+                      height: 1.10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.7,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
-                const SizedBox(
-                  width: 270,
-                  child: Text(
+                Padding(
+                  padding: EdgeInsets.only(
+                    right: isCompact ? 20 : 138,
+                  ),
+                  child: const Text(
                     'Calculate recipe cost, portion cost and food cost percentage in a cleaner premium workflow.',
                     style: TextStyle(
                       fontSize: 14,
@@ -222,27 +228,31 @@ class _HomeHero extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _GlassInfoChip(
-                        icon: Icons.flash_on_rounded,
-                        label: 'Quick costing',
-                      ),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: const [
+                    _HeroChip(
+                      icon: Icons.flash_on_rounded,
+                      label: 'Quick costing',
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _GlassInfoChip(
-                        icon: Icons.auto_graph_rounded,
-                        label: 'Margin visibility',
-                      ),
+                    _HeroChip(
+                      icon: Icons.auto_graph_rounded,
+                      label: 'Margin visibility',
                     ),
                   ],
                 ),
+                if (!isCompact) ...[
+                  const SizedBox(height: 16),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: _HeroMiniPanel(),
+                  ),
+                ],
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -254,7 +264,7 @@ class _HeroMiniPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 118,
+      width: 132,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
@@ -289,11 +299,11 @@ class _HeroMiniPanel extends StatelessWidget {
   }
 }
 
-class _GlassInfoChip extends StatelessWidget {
+class _HeroChip extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _GlassInfoChip({
+  const _HeroChip({
     required this.icon,
     required this.label,
   });
@@ -311,6 +321,7 @@ class _GlassInfoChip extends StatelessWidget {
         ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
@@ -318,14 +329,11 @@ class _GlassInfoChip extends StatelessWidget {
             color: Colors.white.withOpacity(0.92),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
-              ),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
           ),
         ],
@@ -343,76 +351,85 @@ class _HomeSummaryStrip extends StatelessWidget {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 760;
 
-        final cards = const [
-          _SummaryPill(
-            label: 'Core goal',
-            value: 'Cost clarity',
-            icon: Icons.visibility_outlined,
-          ),
-          _SummaryPill(
-            label: 'Main output',
-            value: 'Food cost %',
-            icon: Icons.pie_chart_outline_rounded,
-          ),
-          _SummaryPill(
-            label: 'Use case',
-            value: 'Recipe pricing',
-            icon: Icons.receipt_long_rounded,
-          ),
-          _SummaryPill(
-            label: 'Upgrade path',
-            value: 'GastroApp',
-            icon: Icons.open_in_new_rounded,
-          ),
-        ];
-
         if (compact) {
           return const Column(
             children: [
               Row(
                 children: [
-                  Expanded(child: _SummaryPill(
-                    label: 'Core goal',
-                    value: 'Cost clarity',
-                    icon: Icons.visibility_outlined,
-                  )),
+                  Expanded(
+                    child: _SummaryPill(
+                      label: 'Core goal',
+                      value: 'Cost clarity',
+                      icon: Icons.visibility_outlined,
+                    ),
+                  ),
                   SizedBox(width: 10),
-                  Expanded(child: _SummaryPill(
-                    label: 'Main output',
-                    value: 'Food cost %',
-                    icon: Icons.pie_chart_outline_rounded,
-                  )),
+                  Expanded(
+                    child: _SummaryPill(
+                      label: 'Main output',
+                      value: 'Food cost %',
+                      icon: Icons.pie_chart_outline_rounded,
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 10),
               Row(
                 children: [
-                  Expanded(child: _SummaryPill(
-                    label: 'Use case',
-                    value: 'Recipe pricing',
-                    icon: Icons.receipt_long_rounded,
-                  )),
+                  Expanded(
+                    child: _SummaryPill(
+                      label: 'Use case',
+                      value: 'Recipe pricing',
+                      icon: Icons.receipt_long_rounded,
+                    ),
+                  ),
                   SizedBox(width: 10),
-                  Expanded(child: _SummaryPill(
-                    label: 'Upgrade path',
-                    value: 'GastroApp',
-                    icon: Icons.open_in_new_rounded,
-                  )),
+                  Expanded(
+                    child: _SummaryPill(
+                      label: 'Upgrade path',
+                      value: 'GastroApp',
+                      icon: Icons.open_in_new_rounded,
+                    ),
+                  ),
                 ],
               ),
             ],
           );
         }
 
-        return Row(
+        return const Row(
           children: [
-            Expanded(child: cards[0]),
-            const SizedBox(width: 10),
-            Expanded(child: cards[1]),
-            const SizedBox(width: 10),
-            Expanded(child: cards[2]),
-            const SizedBox(width: 10),
-            Expanded(child: cards[3]),
+            Expanded(
+              child: _SummaryPill(
+                label: 'Core goal',
+                value: 'Cost clarity',
+                icon: Icons.visibility_outlined,
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: _SummaryPill(
+                label: 'Main output',
+                value: 'Food cost %',
+                icon: Icons.pie_chart_outline_rounded,
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: _SummaryPill(
+                label: 'Use case',
+                value: 'Recipe pricing',
+                icon: Icons.receipt_long_rounded,
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: _SummaryPill(
+                label: 'Upgrade path',
+                value: 'GastroApp',
+                icon: Icons.open_in_new_rounded,
+              ),
+            ),
           ],
         );
       },
