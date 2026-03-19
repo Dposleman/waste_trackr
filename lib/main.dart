@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
@@ -71,62 +73,61 @@ class _MainShellState extends State<MainShell> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(
-            color: AppTheme.border.withOpacity(0.85),
-          ),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xF0101E39),
-              const Color(0xF0000717),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.34),
-              blurRadius: 22,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: NavigationBar(
-            selectedIndex: _currentIndex,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            labelBehavior:
-                NavigationDestinationLabelBehavior.onlyShowSelected,
-            onDestinationSelected: (index) {
-              setState(() => _currentIndex = index);
-            },
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: 'Home',
+          borderRadius: BorderRadius.circular(30),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                color: const Color(0xAA07111F),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.08),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.30),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
               ),
-              NavigationDestination(
-                icon: Icon(Icons.calculate_outlined),
-                selectedIcon: Icon(Icons.calculate_rounded),
-                label: 'Calculator',
+              child: NavigationBar(
+                selectedIndex: _currentIndex,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                labelBehavior:
+                    NavigationDestinationLabelBehavior.alwaysShow,
+                onDestinationSelected: (index) {
+                  setState(() => _currentIndex = index);
+                },
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home_rounded),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.calculate_outlined),
+                    selectedIcon: Icon(Icons.calculate_rounded),
+                    label: 'Calculator',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.bookmark_border_rounded),
+                    selectedIcon: Icon(Icons.bookmark_rounded),
+                    label: 'Saved',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.settings_outlined),
+                    selectedIcon: Icon(Icons.settings_rounded),
+                    label: 'Settings',
+                  ),
+                ],
               ),
-              NavigationDestination(
-                icon: Icon(Icons.bookmark_border_rounded),
-                selectedIcon: Icon(Icons.bookmark_rounded),
-                label: 'Saved',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_rounded),
-                label: 'Settings',
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -142,46 +143,62 @@ class _PremiumBackground extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
-          center: Alignment.topLeft,
-          radius: 1.35,
+          center: Alignment(-0.85, -1.0),
+          radius: 1.6,
           colors: [
-            Color(0xFF0D2450),
-            Color(0xFF071226),
-            Color(0xFF040914),
+            Color(0xFF132D61),
+            Color(0xFF08172F),
+            Color(0xFF030814),
           ],
-          stops: [0.0, 0.52, 1.0],
+          stops: [0.0, 0.42, 1.0],
         ),
       ),
       child: Stack(
         children: [
           Positioned(
-            top: -90,
-            left: -70,
-            child: _glow(
+            top: -120,
+            left: -120,
+            child: _blurOrb(
+              size: 280,
+              color: const Color(0xFF58A6FF).withOpacity(0.24),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: -110,
+            child: _blurOrb(
+              size: 240,
+              color: const Color(0xFF33D6FF).withOpacity(0.14),
+            ),
+          ),
+          Positioned(
+            top: 280,
+            left: -100,
+            child: _blurOrb(
               size: 220,
-              color: AppTheme.primary.withOpacity(0.18),
+              color: const Color(0xFF6E6BFF).withOpacity(0.10),
             ),
           ),
           Positioned(
-            top: 120,
-            right: -70,
-            child: _glow(
-              size: 200,
-              color: AppTheme.cyan.withOpacity(0.10),
+            bottom: 140,
+            right: -120,
+            child: _blurOrb(
+              size: 260,
+              color: const Color(0xFF25C8FF).withOpacity(0.10),
             ),
           ),
           Positioned(
-            bottom: 100,
-            left: -60,
-            child: _glow(
-              size: 180,
-              color: AppTheme.violet.withOpacity(0.10),
+            bottom: -60,
+            left: -80,
+            child: _blurOrb(
+              size: 220,
+              color: const Color(0xFF7A5CFF).withOpacity(0.08),
             ),
           ),
           Positioned.fill(
             child: IgnorePointer(
               child: CustomPaint(
-                painter: _BackgroundPainter(),
+                painter: _SoftMeshPainter(),
               ),
             ),
           ),
@@ -190,65 +207,80 @@ class _PremiumBackground extends StatelessWidget {
     );
   }
 
-  Widget _glow({required double size, required Color color}) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color,
-            blurRadius: 90,
-            spreadRadius: 18,
-          ),
-        ],
+  Widget _blurOrb({
+    required double size,
+    required Color color,
+  }) {
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+        ),
       ),
     );
   }
 }
 
-class _BackgroundPainter extends CustomPainter {
+class _SoftMeshPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint1 = Paint()
-      ..color = AppTheme.primary.withOpacity(0.05)
-      ..style = PaintingStyle.fill;
-
-    final paint2 = Paint()
-      ..color = AppTheme.cyan.withOpacity(0.04)
-      ..style = PaintingStyle.fill;
-
-    final paint3 = Paint()
-      ..color = Colors.white.withOpacity(0.025)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
     final path1 = Path()
-      ..moveTo(size.width * 0.72, 0)
+      ..moveTo(size.width * 0.68, 0)
+      ..quadraticBezierTo(
+        size.width * 0.94,
+        size.height * 0.10,
+        size.width,
+        size.height * 0.28,
+      )
       ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height * 0.25)
       ..close();
 
-    final path2 = Path()
-      ..moveTo(0, size.height * 0.55)
-      ..lineTo(size.width * 0.22, size.height * 0.46)
-      ..lineTo(size.width * 0.16, size.height * 0.72)
-      ..close();
+    final paint1 = Paint()
+      ..color = Colors.white.withOpacity(0.018)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30);
 
     canvas.drawPath(path1, paint1);
+
+    final path2 = Path()
+      ..moveTo(0, size.height * 0.42)
+      ..quadraticBezierTo(
+        size.width * 0.16,
+        size.height * 0.36,
+        size.width * 0.24,
+        size.height * 0.52,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.12,
+        size.height * 0.62,
+        0,
+        size.height * 0.58,
+      )
+      ..close();
+
+    final paint2 = Paint()
+      ..color = AppTheme.primary.withOpacity(0.035)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 35);
+
     canvas.drawPath(path2, paint2);
 
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.03)
+      ..strokeWidth = 1;
+
     canvas.drawLine(
-      Offset(size.width * 0.08, size.height * 0.16),
-      Offset(size.width * 0.92, size.height * 0.16),
-      paint3,
+      Offset(size.width * 0.10, size.height * 0.16),
+      Offset(size.width * 0.78, size.height * 0.16),
+      linePaint,
     );
 
     canvas.drawLine(
-      Offset(size.width * 0.12, size.height * 0.52),
-      Offset(size.width * 0.88, size.height * 0.52),
-      paint3..color = Colors.white.withOpacity(0.018),
+      Offset(size.width * 0.22, size.height * 0.78),
+      Offset(size.width * 0.92, size.height * 0.78),
+      linePaint..color = Colors.white.withOpacity(0.018),
     );
   }
 
