@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color background = Color(0xFF050B16);
-  static const Color backgroundSoft = Color(0xFF0A1630);
+  static const Color background = Color(0xFF040814);
+  static const Color backgroundSoft = Color(0xFF091224);
 
-  static const Color surface = Color(0xFF101A2B);
-  static const Color surfaceAlt = Color(0xFF14233B);
+  static const Color surface = Color(0xB2142033);
+  static const Color surfaceAlt = Color(0xE0111B2D);
 
-  static const Color primary = Color(0xFF69A8FF);
-  static const Color cyan = Color(0xFF46D7FF);
-  static const Color violet = Color(0xFF7A67FF);
+  static const Color primary = Color(0xFF6FA8FF);
+  static const Color cyan = Color(0xFF3FD6FF);
+  static const Color violet = Color(0xFF7B61FF);
 
-  static const Color textPrimary = Color(0xFFF5F8FF);
-  static const Color textMuted = Color(0xFFA8B4CE);
-  static const Color textSoft = Color(0xFF8090AF);
+  static const Color textPrimary = Color(0xFFF4F7FF);
+  static const Color textMuted = Color(0xFFAEB9D6);
+  static const Color textSoft = Color(0xFF7D8AA8);
 
-  static const Color border = Color(0xFF24395F);
-  static const Color borderStrong = Color(0xFF31538A);
+  static const Color border = Color(0xFF223657);
+  static const Color borderStrong = Color(0xFF31517E);
 
   static ThemeData get darkTheme {
     final base = ThemeData.dark(useMaterial3: true);
@@ -25,6 +25,8 @@ class AppTheme {
       scaffoldBackgroundColor: background,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      dividerColor: border,
       colorScheme: const ColorScheme.dark(
         primary: primary,
         secondary: cyan,
@@ -46,23 +48,27 @@ class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
+          side: const BorderSide(
+            color: border,
+            width: 1,
+          ),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.transparent,
-        indicatorColor: Colors.transparent,
+        indicatorColor: const Color(0x00000000),
         height: 82,
-        surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
             color: states.contains(WidgetState.selected)
                 ? textPrimary
                 : textSoft,
-            fontSize: 12,
+            fontSize: 11.5,
             fontWeight: states.contains(WidgetState.selected)
                 ? FontWeight.w800
-                : FontWeight.w600,
+                : FontWeight.w700,
             letterSpacing: -0.1,
           ),
         ),
@@ -71,13 +77,14 @@ class AppTheme {
             color: states.contains(WidgetState.selected)
                 ? textPrimary
                 : textSoft,
-            size: 24,
+            size: 23,
           ),
         ),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceAlt.withOpacity(0.94),
+        fillColor: surfaceAlt.withOpacity(0.92),
         hintStyle: const TextStyle(
           color: textSoft,
           fontSize: 14,
@@ -102,7 +109,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(
             color: primary,
-            width: 1.25,
+            width: 1.3,
           ),
         ),
       ),
@@ -110,7 +117,9 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: textPrimary,
-          minimumSize: const Size.fromHeight(60),
+          disabledBackgroundColor: primary.withOpacity(0.35),
+          disabledForegroundColor: textPrimary.withOpacity(0.7),
+          minimumSize: const Size.fromHeight(58),
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -128,7 +137,7 @@ class AppTheme {
           foregroundColor: textPrimary,
           minimumSize: const Size.fromHeight(56),
           side: BorderSide(
-            color: borderStrong.withOpacity(0.85),
+            color: borderStrong.withOpacity(0.9),
             width: 1,
           ),
           shape: RoundedRectangleBorder(
@@ -141,7 +150,7 @@ class AppTheme {
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF0D1A31),
+        backgroundColor: const Color(0xFF0C172B),
         contentTextStyle: const TextStyle(
           color: textPrimary,
           fontWeight: FontWeight.w600,
@@ -151,7 +160,6 @@ class AppTheme {
         ),
         behavior: SnackBarBehavior.floating,
       ),
-      dividerColor: border,
     );
   }
 }

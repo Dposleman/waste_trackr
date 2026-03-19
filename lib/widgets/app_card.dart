@@ -16,33 +16,53 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(radius);
+
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.30),
-            blurRadius: 34,
-            offset: const Offset(0, 18),
+            color: Colors.black.withOpacity(0.34),
+            blurRadius: 42,
+            spreadRadius: -6,
+            offset: const Offset(0, 22),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF57C8FF).withOpacity(0.08),
+            blurRadius: 26,
+            spreadRadius: -10,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.03),
+            blurRadius: 12,
+            spreadRadius: -8,
+            offset: const Offset(0, -2),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
+        borderRadius: borderRadius,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(radius),
-              color: const Color(0x54111927),
+              borderRadius: borderRadius,
+              color: const Color(0x66141E31),
               border: Border.all(
                 color: Colors.white.withOpacity(0.14),
                 width: 1.05,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.08),
+                  Colors.white.withOpacity(0.025),
+                  Colors.white.withOpacity(0.01),
+                ],
+                stops: const [0.0, 0.32, 1.0],
               ),
             ),
             child: Stack(
@@ -50,81 +70,124 @@ class AppCard extends StatelessWidget {
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(radius),
+                      borderRadius: borderRadius,
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                         colors: [
-                          Colors.white.withOpacity(0.12),
-                          Colors.white.withOpacity(0.05),
-                          Colors.white.withOpacity(0.015),
+                          Colors.white.withOpacity(0.06),
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.06),
                         ],
-                        stops: const [0.0, 0.22, 1.0],
+                        stops: const [0.0, 0.28, 1.0],
                       ),
                     ),
                   ),
                 ),
+
                 Positioned(
                   top: 0,
                   left: 18,
                   right: 18,
                   child: Container(
-                    height: 1.1,
-                    color: Colors.white.withOpacity(0.18),
-                  ),
-                ),
-                Positioned(
-                  top: -14,
-                  left: 22,
-                  child: Container(
-                    width: 150,
-                    height: 68,
+                    height: 1,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
                       gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
                         colors: [
-                          Colors.white.withOpacity(0.12),
-                          Colors.white.withOpacity(0.0),
+                          Colors.transparent,
+                          Colors.white.withOpacity(0.26),
+                          Colors.transparent,
                         ],
                       ),
                     ),
                   ),
                 ),
+
                 Positioned(
-                  top: 24,
-                  right: 24,
-                  child: Container(
-                    width: 68,
-                    height: 68,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.018),
+                  top: -20,
+                  left: 24,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 150,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withOpacity(0.16),
+                            Colors.white.withOpacity(0.02),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
+
+                Positioned(
+                  top: 14,
+                  right: 16,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            const Color(0xFF56D7FF).withOpacity(0.10),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Positioned(
+                  right: -26,
+                  bottom: -26,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 130,
+                      height: 130,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.035),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(radius),
+                      borderRadius: borderRadius,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.022),
-                          blurRadius: 24,
+                          color: Colors.white.withOpacity(0.02),
+                          blurRadius: 20,
                           spreadRadius: 1,
-                          offset: const Offset(0, -3),
+                          offset: const Offset(0, -2),
                         ),
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.18),
+                          color: Colors.black.withOpacity(0.12),
                           blurRadius: 22,
                           spreadRadius: 1,
-                          offset: const Offset(0, 8),
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
                   ),
                 ),
+
                 Padding(
                   padding: padding,
                   child: child,

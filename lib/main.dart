@@ -75,109 +75,199 @@ class _MainShellState extends State<MainShell> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                color: const Color(0x6607111F),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.10),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.30),
-                    blurRadius: 30,
-                    offset: const Offset(0, 14),
-                  ),
-                ],
-              ),
-              child: NavigationBar(
-                selectedIndex: _currentIndex,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                onDestinationSelected: (index) {
-                  setState(() => _currentIndex = index);
-                },
-                destinations: [
-                  _destination(
-                    selected: _currentIndex == 0,
-                    activeIcon: Icons.home_rounded,
-                    inactiveIcon: Icons.home_outlined,
-                    label: 'Home',
-                  ),
-                  _destination(
-                    selected: _currentIndex == 1,
-                    activeIcon: Icons.calculate_rounded,
-                    inactiveIcon: Icons.calculate_outlined,
-                    label: 'Calculator',
-                  ),
-                  _destination(
-                    selected: _currentIndex == 2,
-                    activeIcon: Icons.bookmark_rounded,
-                    inactiveIcon: Icons.bookmark_border_rounded,
-                    label: 'Saved',
-                  ),
-                  _destination(
-                    selected: _currentIndex == 3,
-                    activeIcon: Icons.settings_rounded,
-                    inactiveIcon: Icons.settings_outlined,
-                    label: 'Settings',
-                  ),
-                ],
-              ),
-            ),
-          ),
+        child: _PremiumBottomNav(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+          },
         ),
       ),
     );
   }
+}
 
-  NavigationDestination _destination({
-    required bool selected,
-    required IconData activeIcon,
-    required IconData inactiveIcon,
-    required String label,
-  }) {
-    return NavigationDestination(
-      label: label,
-      icon: Icon(inactiveIcon),
-      selectedIcon: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primary.withOpacity(0.28),
-              AppTheme.cyan.withOpacity(0.18),
+class _PremiumBottomNav extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  const _PremiumBottomNav({
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <_PremiumNavItemData>[
+      const _PremiumNavItemData(
+        label: 'Home',
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home_rounded,
+      ),
+      const _PremiumNavItemData(
+        label: 'Calculator',
+        icon: Icons.calculate_outlined,
+        selectedIcon: Icons.calculate_rounded,
+      ),
+      const _PremiumNavItemData(
+        label: 'Saved',
+        icon: Icons.bookmark_border_rounded,
+        selectedIcon: Icons.bookmark_rounded,
+      ),
+      const _PremiumNavItemData(
+        label: 'Settings',
+        icon: Icons.settings_outlined,
+        selectedIcon: Icons.settings_rounded,
+      ),
+    ];
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(34),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+        child: Container(
+          height: 84,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(34),
+            color: const Color(0x5C0A1323),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.10),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.34),
+                blurRadius: 34,
+                offset: const Offset(0, 18),
+              ),
+              BoxShadow(
+                color: const Color(0xFF4CD5FF).withOpacity(0.05),
+                blurRadius: 20,
+                spreadRadius: -6,
+                offset: const Offset(0, 8),
+              ),
             ],
           ),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.14),
-            width: 1,
+          child: Row(
+            children: List.generate(items.length, (index) {
+              final item = items[index];
+              final selected = index == currentIndex;
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(index),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 240),
+                    curve: Curves.easeOutCubic,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: selected
+                          ? Border.all(
+                              color: Colors.white.withOpacity(0.12),
+                              width: 1,
+                            )
+                          : null,
+                      gradient: selected
+                          ? LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.white.withOpacity(0.14),
+                                const Color(0xFF43CFFF).withOpacity(0.12),
+                                const Color(0xFF7B61FF).withOpacity(0.10),
+                              ],
+                            )
+                          : null,
+                      boxShadow: selected
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFF44D2FF).withOpacity(0.10),
+                                blurRadius: 18,
+                                spreadRadius: -8,
+                                offset: const Offset(0, 8),
+                              ),
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.04),
+                                blurRadius: 10,
+                                spreadRadius: -6,
+                                offset: const Offset(0, -2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 240),
+                          curve: Curves.easeOutCubic,
+                          height: 34,
+                          width: 48,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            gradient: selected
+                                ? LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.white.withOpacity(0.20),
+                                      Colors.white.withOpacity(0.06),
+                                    ],
+                                  )
+                                : null,
+                          ),
+                          child: Icon(
+                            selected ? item.selectedIcon : item.icon,
+                            color: selected
+                                ? AppTheme.textPrimary
+                                : AppTheme.textSoft,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: selected
+                                ? AppTheme.textPrimary
+                                : AppTheme.textSoft,
+                            fontSize: 11.5,
+                            fontWeight:
+                                selected ? FontWeight.w800 : FontWeight.w700,
+                            letterSpacing: -0.1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primary.withOpacity(0.18),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Icon(
-          activeIcon,
-          color: Colors.white,
-          size: 23,
         ),
       ),
     );
   }
+}
+
+class _PremiumNavItemData {
+  final String label;
+  final IconData icon;
+  final IconData selectedIcon;
+
+  const _PremiumNavItemData({
+    required this.label,
+    required this.icon,
+    required this.selectedIcon,
+  });
 }
 
 class _PremiumBackground extends StatelessWidget {
@@ -191,43 +281,37 @@ class _PremiumBackground extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF0D2042),
-            Color(0xFF09172D),
-            Color(0xFF050B17),
-            Color(0xFF02050D),
+            Color(0xFF0B1831),
+            Color(0xFF081221),
+            Color(0xFF050B16),
+            Color(0xFF03060E),
           ],
-          stops: [0.0, 0.28, 0.70, 1.0],
+          stops: [0.0, 0.32, 0.74, 1.0],
         ),
       ),
       child: Stack(
         children: [
           Positioned.fill(
             child: CustomPaint(
-              painter: _PremiumGridPainter(),
+              painter: _StructuredBackgroundPainter(),
             ),
           ),
           Positioned(
-            top: -100,
-            left: -70,
+            top: -70,
+            right: -34,
             child: _edgeGlow(
-              size: 180,
-              color: AppTheme.primary.withOpacity(0.10),
+              width: 170,
+              height: 170,
+              color: const Color(0xFF38D4FF).withOpacity(0.09),
             ),
           ),
           Positioned(
-            top: 70,
-            right: -70,
+            bottom: 110,
+            left: -46,
             child: _edgeGlow(
-              size: 150,
-              color: AppTheme.cyan.withOpacity(0.07),
-            ),
-          ),
-          Positioned(
-            bottom: 120,
-            right: -80,
-            child: _edgeGlow(
-              size: 170,
-              color: AppTheme.violet.withOpacity(0.06),
+              width: 150,
+              height: 150,
+              color: const Color(0xFF775EFF).withOpacity(0.08),
             ),
           ),
         ],
@@ -236,15 +320,16 @@ class _PremiumBackground extends StatelessWidget {
   }
 
   Widget _edgeGlow({
-    required double size,
+    required double width,
+    required double height,
     required Color color,
   }) {
     return IgnorePointer(
       child: ImageFiltered(
-        imageFilter: ImageFilter.blur(sigmaX: 36, sigmaY: 36),
+        imageFilter: ImageFilter.blur(sigmaX: 34, sigmaY: 34),
         child: Container(
-          width: size,
-          height: size,
+          width: width,
+          height: height,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color,
@@ -255,99 +340,126 @@ class _PremiumBackground extends StatelessWidget {
   }
 }
 
-class _PremiumGridPainter extends CustomPainter {
+class _StructuredBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final lineSoft = Paint()
-      ..color = Colors.white.withOpacity(0.028)
+    final subtleLine = Paint()
+      ..color = Colors.white.withOpacity(0.026)
       ..strokeWidth = 1;
 
-    final lineSofter = Paint()
-      ..color = Colors.white.withOpacity(0.012)
+    final faintLine = Paint()
+      ..color = Colors.white.withOpacity(0.014)
       ..strokeWidth = 1;
 
-    final accent = Paint()
-      ..color = AppTheme.primary.withOpacity(0.045)
-      ..strokeWidth = 1.1
+    final accentLine = Paint()
+      ..color = const Color(0xFF58CFFF).withOpacity(0.06)
+      ..strokeWidth = 1.15
       ..style = PaintingStyle.stroke;
 
-    final beamPaint = Paint()
+    final topBeam = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Color(0x18FFFFFF),
+          Color(0x20FFFFFF),
           Color(0x00FFFFFF),
         ],
       ).createShader(
-        Rect.fromLTWH(0, 0, size.width * 0.48, size.height * 0.26),
+        Rect.fromLTWH(0, 0, size.width * 0.42, size.height * 0.24),
       );
 
-    final beamPath = Path()
+    final topLeftShape = Path()
       ..moveTo(0, 0)
-      ..lineTo(size.width * 0.34, 0)
-      ..lineTo(size.width * 0.16, size.height * 0.34)
-      ..lineTo(0, size.height * 0.46)
+      ..lineTo(size.width * 0.36, 0)
+      ..lineTo(size.width * 0.20, size.height * 0.26)
+      ..lineTo(0, size.height * 0.38)
       ..close();
 
-    canvas.drawPath(beamPath, beamPaint);
+    canvas.drawPath(topLeftShape, topBeam);
+
+    final rightGlowPaint = Paint()
+      ..color = const Color(0xFF35D4FF).withOpacity(0.030)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
+
+    final rightShape = Path()
+      ..moveTo(size.width * 0.88, size.height * 0.03)
+      ..quadraticBezierTo(
+        size.width * 1.02,
+        size.height * 0.15,
+        size.width * 0.92,
+        size.height * 0.31,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.84,
+        size.height * 0.18,
+        size.width * 0.88,
+        size.height * 0.03,
+      )
+      ..close();
+
+    canvas.drawPath(rightShape, rightGlowPaint);
 
     canvas.drawLine(
-      Offset(size.width * 0.08, size.height * 0.12),
-      Offset(size.width * 0.78, size.height * 0.12),
-      lineSoft,
+      Offset(size.width * 0.08, size.height * 0.13),
+      Offset(size.width * 0.82, size.height * 0.13),
+      subtleLine,
     );
 
     canvas.drawLine(
-      Offset(size.width * 0.16, size.height * 0.34),
-      Offset(size.width * 0.92, size.height * 0.34),
-      lineSofter,
+      Offset(size.width * 0.20, size.height * 0.54),
+      Offset(size.width * 0.94, size.height * 0.54),
+      faintLine,
     );
 
     canvas.drawLine(
-      Offset(size.width * 0.24, size.height * 0.70),
-      Offset(size.width * 0.94, size.height * 0.70),
-      lineSofter,
+      Offset(size.width * 0.28, size.height * 0.82),
+      Offset(size.width * 0.94, size.height * 0.82),
+      faintLine,
     );
 
-    final arc1 = Rect.fromCircle(
-      center: Offset(size.width * 0.94, size.height * 0.16),
+    final arcRectTopOuter = Rect.fromCircle(
+      center: Offset(size.width * 0.92, size.height * 0.10),
+      radius: 62,
+    );
+
+    final arcRectTopInner = Rect.fromCircle(
+      center: Offset(size.width * 0.92, size.height * 0.10),
+      radius: 44,
+    );
+
+    final arcRectBottom = Rect.fromCircle(
+      center: Offset(size.width * 0.08, size.height * 0.88),
       radius: 58,
     );
-    final arc2 = Rect.fromCircle(
-      center: Offset(size.width * 0.10, size.height * 0.86),
-      radius: 54,
+
+    canvas.drawArc(
+      arcRectTopOuter,
+      3.55,
+      1.38,
+      false,
+      accentLine,
     );
 
-    canvas.drawArc(arc1, 3.6, 1.3, false, accent);
     canvas.drawArc(
-      arc2,
-      5.1,
-      1.25,
+      arcRectTopInner,
+      3.55,
+      1.38,
       false,
       Paint()
-        ..color = AppTheme.violet.withOpacity(0.04)
+        ..color = const Color(0xFF38D5FF).withOpacity(0.045)
         ..strokeWidth = 1.1
         ..style = PaintingStyle.stroke,
     );
 
-    final rightShard = Path()
-      ..moveTo(size.width * 0.86, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height * 0.24)
-      ..quadraticBezierTo(
-        size.width * 0.88,
-        size.height * 0.18,
-        size.width * 0.86,
-        0,
-      )
-      ..close();
-
-    canvas.drawPath(
-      rightShard,
+    canvas.drawArc(
+      arcRectBottom,
+      5.18,
+      1.14,
+      false,
       Paint()
-        ..color = AppTheme.cyan.withOpacity(0.028)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+        ..color = const Color(0xFF7A63FF).withOpacity(0.040)
+        ..strokeWidth = 1.15
+        ..style = PaintingStyle.stroke,
     );
   }
 
