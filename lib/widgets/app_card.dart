@@ -16,79 +16,121 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(radius),
-            color: const Color(0x66111C2E),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.11),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.18),
-                blurRadius: 26,
-                offset: const Offset(0, 12),
-              ),
-              BoxShadow(
-                color: Colors.white.withOpacity(0.015),
-                blurRadius: 1,
-                offset: const Offset(0, 1),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.24),
+            blurRadius: 34,
+            offset: const Offset(0, 18),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 1,
-                child: Container(
-                  color: Colors.white.withOpacity(0.08),
-                ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.10),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(radius),
+              color: const Color(0x54111C2E),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.12),
+                width: 1.05,
               ),
-              Positioned(
-                top: -40,
-                left: -20,
-                child: Container(
-                  width: 140,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(radius),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withOpacity(0.07),
-                        Colors.white.withOpacity(0.0),
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(radius),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withOpacity(0.085),
+                          Colors.white.withOpacity(0.028),
+                          Colors.white.withOpacity(0.012),
+                        ],
+                        stops: const [0.0, 0.28, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 18,
+                  right: 18,
+                  child: Container(
+                    height: 1,
+                    color: Colors.white.withOpacity(0.16),
+                  ),
+                ),
+                Positioned(
+                  top: -18,
+                  left: 20,
+                  child: Container(
+                    width: 140,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withOpacity(0.09),
+                          Colors.white.withOpacity(0.0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: -20,
+                  bottom: -24,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.018),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(radius),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.015),
+                          blurRadius: 20,
+                          spreadRadius: 1,
+                          offset: const Offset(0, -2),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.16),
+                          blurRadius: 20,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 8),
+                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withOpacity(0.035),
-                      Colors.white.withOpacity(0.012),
-                    ],
-                  ),
-                ),
-                child: Padding(
+                Padding(
                   padding: padding,
                   child: child,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

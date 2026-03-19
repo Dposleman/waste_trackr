@@ -78,19 +78,19 @@ class _MainShellState extends State<MainShell> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(32),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+            filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
-                color: const Color(0x70061222),
+                color: const Color(0x5E081321),
                 border: Border.all(
                   color: Colors.white.withOpacity(0.09),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.24),
-                    blurRadius: 28,
+                    color: Colors.black.withOpacity(0.28),
+                    blurRadius: 30,
                     offset: const Offset(0, 14),
                   ),
                 ],
@@ -146,61 +146,37 @@ class _PremiumBackground extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF102650),
-            Color(0xFF091A35),
-            Color(0xFF040B18),
-            Color(0xFF020611),
+            Color(0xFF0E2347),
+            Color(0xFF09182F),
+            Color(0xFF050C19),
+            Color(0xFF02050E),
           ],
-          stops: [0.0, 0.26, 0.70, 1.0],
+          stops: [0.0, 0.30, 0.72, 1.0],
         ),
       ),
       child: Stack(
         children: [
-          Positioned(
-            top: -150,
-            left: -120,
-            child: _orb(
-              size: 320,
-              color: const Color(0xFF5CA8FF).withOpacity(0.26),
-            ),
-          ),
-          Positioned(
-            top: -10,
-            right: -100,
-            child: _orb(
-              size: 250,
-              color: const Color(0xFF2DD6FF).withOpacity(0.14),
-            ),
-          ),
-          Positioned(
-            top: 280,
-            left: -120,
-            child: _orb(
-              size: 240,
-              color: const Color(0xFF7B61FF).withOpacity(0.11),
-            ),
-          ),
-          Positioned(
-            bottom: 180,
-            right: -130,
-            child: _orb(
-              size: 280,
-              color: const Color(0xFF1FC8FF).withOpacity(0.10),
-            ),
-          ),
-          Positioned(
-            bottom: -80,
-            left: -40,
-            child: _orb(
-              size: 220,
-              color: const Color(0xFF6F5BFF).withOpacity(0.08),
-            ),
-          ),
           Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _AmbientPainter(),
-              ),
+            child: CustomPaint(
+              painter: _StructuredBackgroundPainter(),
+            ),
+          ),
+          Positioned(
+            top: -90,
+            right: -40,
+            child: _edgeGlow(
+              width: 180,
+              height: 180,
+              color: const Color(0xFF35CFFF).withOpacity(0.10),
+            ),
+          ),
+          Positioned(
+            bottom: 120,
+            left: -60,
+            child: _edgeGlow(
+              width: 160,
+              height: 160,
+              color: const Color(0xFF6E63FF).withOpacity(0.08),
             ),
           ),
         ],
@@ -208,89 +184,139 @@ class _PremiumBackground extends StatelessWidget {
     );
   }
 
-  Widget _orb({
-    required double size,
+  Widget _edgeGlow({
+    required double width,
+    required double height,
     required Color color,
   }) {
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 52, sigmaY: 52),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
+    return IgnorePointer(
+      child: ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 36, sigmaY: 36),
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+          ),
         ),
       ),
     );
   }
 }
 
-class _AmbientPainter extends CustomPainter {
+class _StructuredBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final topGlow = Paint()
+    final softLine = Paint()
+      ..color = Colors.white.withOpacity(0.028)
+      ..strokeWidth = 1;
+
+    final softerLine = Paint()
+      ..color = Colors.white.withOpacity(0.014)
+      ..strokeWidth = 1;
+
+    final accentLine = Paint()
+      ..color = const Color(0xFF6CB6FF).withOpacity(0.06)
+      ..strokeWidth = 1.2;
+
+    final topBeam = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Color(0x18FFFFFF),
+          Color(0x22FFFFFF),
           Color(0x00FFFFFF),
         ],
       ).createShader(
-        Rect.fromLTWH(0, 0, size.width * 0.55, size.height * 0.22),
-      )
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
+        Rect.fromLTWH(0, 0, size.width * 0.42, size.height * 0.22),
+      );
 
-    final topPath = Path()
+    final beamPath = Path()
       ..moveTo(0, 0)
-      ..lineTo(size.width * 0.52, 0)
-      ..quadraticBezierTo(
-        size.width * 0.28,
-        size.height * 0.10,
-        0,
-        size.height * 0.18,
-      )
+      ..lineTo(size.width * 0.38, 0)
+      ..lineTo(size.width * 0.21, size.height * 0.28)
+      ..lineTo(0, size.height * 0.40)
       ..close();
 
-    canvas.drawPath(topPath, topGlow);
+    canvas.drawPath(beamPath, topBeam);
 
-    final rightGlow = Paint()
-      ..color = const Color(0x22A7E8FF)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);
+    final rightShapePaint = Paint()
+      ..color = const Color(0xFF33D6FF).withOpacity(0.035)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
 
-    final rightPath = Path()
-      ..moveTo(size.width * 0.82, size.height * 0.10)
+    final rightShape = Path()
+      ..moveTo(size.width * 0.88, size.height * 0.02)
       ..quadraticBezierTo(
         size.width * 1.02,
-        size.height * 0.18,
-        size.width * 0.90,
-        size.height * 0.34,
+        size.height * 0.14,
+        size.width * 0.92,
+        size.height * 0.32,
       )
       ..quadraticBezierTo(
-        size.width * 0.78,
-        size.height * 0.22,
-        size.width * 0.82,
-        size.height * 0.10,
+        size.width * 0.84,
+        size.height * 0.18,
+        size.width * 0.88,
+        size.height * 0.02,
       )
       ..close();
 
-    canvas.drawPath(rightPath, rightGlow);
-
-    final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.022)
-      ..strokeWidth = 1;
+    canvas.drawPath(rightShape, rightShapePaint);
 
     canvas.drawLine(
-      Offset(size.width * 0.08, size.height * 0.14),
-      Offset(size.width * 0.78, size.height * 0.14),
-      linePaint,
+      Offset(size.width * 0.08, size.height * 0.12),
+      Offset(size.width * 0.80, size.height * 0.12),
+      softLine,
     );
 
     canvas.drawLine(
-      Offset(size.width * 0.22, size.height * 0.82),
+      Offset(size.width * 0.18, size.height * 0.52),
+      Offset(size.width * 0.92, size.height * 0.52),
+      softerLine,
+    );
+
+    canvas.drawLine(
+      Offset(size.width * 0.24, size.height * 0.82),
       Offset(size.width * 0.94, size.height * 0.82),
-      linePaint..color = Colors.white.withOpacity(0.012),
+      softerLine,
+    );
+
+    final arcRect1 = Rect.fromCircle(
+      center: Offset(size.width * 0.92, size.height * 0.10),
+      radius: 62,
+    );
+    final arcRect2 = Rect.fromCircle(
+      center: Offset(size.width * 0.92, size.height * 0.10),
+      radius: 44,
+    );
+    final arcRect3 = Rect.fromCircle(
+      center: Offset(size.width * 0.08, size.height * 0.86),
+      radius: 58,
+    );
+
+    canvas.drawArc(
+      arcRect1,
+      3.5,
+      1.4,
+      false,
+      accentLine,
+    );
+    canvas.drawArc(
+      arcRect2,
+      3.5,
+      1.4,
+      false,
+      accentLine..color = const Color(0xFF35CFFF).withOpacity(0.045),
+    );
+    canvas.drawArc(
+      arcRect3,
+      5.2,
+      1.2,
+      false,
+      Paint()
+        ..color = const Color(0xFF7A63FF).withOpacity(0.040)
+        ..strokeWidth = 1.2
+        ..style = PaintingStyle.stroke,
     );
   }
 
