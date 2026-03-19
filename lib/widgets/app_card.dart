@@ -21,14 +21,14 @@ class AppCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.24),
+            color: Colors.black.withOpacity(0.30),
             blurRadius: 34,
             offset: const Offset(0, 18),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.10),
+            color: Colors.black.withOpacity(0.12),
             blurRadius: 8,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -39,9 +39,9 @@ class AppCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(radius),
-              color: const Color(0x54111C2E),
+              color: const Color(0x54111927),
               border: Border.all(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withOpacity(0.14),
                 width: 1.05,
               ),
             ),
@@ -55,11 +55,11 @@ class AppCard extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Colors.white.withOpacity(0.085),
-                          Colors.white.withOpacity(0.028),
-                          Colors.white.withOpacity(0.012),
+                          Colors.white.withOpacity(0.12),
+                          Colors.white.withOpacity(0.05),
+                          Colors.white.withOpacity(0.015),
                         ],
-                        stops: const [0.0, 0.28, 1.0],
+                        stops: const [0.0, 0.22, 1.0],
                       ),
                     ),
                   ),
@@ -69,23 +69,23 @@ class AppCard extends StatelessWidget {
                   left: 18,
                   right: 18,
                   child: Container(
-                    height: 1,
-                    color: Colors.white.withOpacity(0.16),
+                    height: 1.1,
+                    color: Colors.white.withOpacity(0.18),
                   ),
                 ),
                 Positioned(
-                  top: -18,
-                  left: 20,
+                  top: -14,
+                  left: 22,
                   child: Container(
-                    width: 140,
-                    height: 60,
+                    width: 150,
+                    height: 68,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.white.withOpacity(0.09),
+                          Colors.white.withOpacity(0.12),
                           Colors.white.withOpacity(0.0),
                         ],
                       ),
@@ -93,11 +93,11 @@ class AppCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  right: -20,
-                  bottom: -24,
+                  top: 24,
+                  right: 24,
                   child: Container(
-                    width: 120,
-                    height: 120,
+                    width: 68,
+                    height: 68,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white.withOpacity(0.018),
@@ -110,14 +110,14 @@ class AppCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(radius),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.015),
-                          blurRadius: 20,
+                          color: Colors.white.withOpacity(0.022),
+                          blurRadius: 24,
                           spreadRadius: 1,
-                          offset: const Offset(0, -2),
+                          offset: const Offset(0, -3),
                         ),
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.16),
-                          blurRadius: 20,
+                          color: Colors.black.withOpacity(0.18),
+                          blurRadius: 22,
                           spreadRadius: 1,
                           offset: const Offset(0, 8),
                         ),

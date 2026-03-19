@@ -78,18 +78,18 @@ class _MainShellState extends State<MainShell> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(32),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
-                color: const Color(0x5E081321),
+                color: const Color(0x6607111F),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.09),
+                  color: Colors.white.withOpacity(0.10),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.28),
+                    color: Colors.black.withOpacity(0.30),
                     blurRadius: 30,
                     offset: const Offset(0, 14),
                   ),
@@ -99,36 +99,81 @@ class _MainShellState extends State<MainShell> {
                 selectedIndex: _currentIndex,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                labelBehavior:
-                    NavigationDestinationLabelBehavior.alwaysShow,
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 onDestinationSelected: (index) {
                   setState(() => _currentIndex = index);
                 },
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.home_outlined),
-                    selectedIcon: Icon(Icons.home_rounded),
+                destinations: [
+                  _destination(
+                    selected: _currentIndex == 0,
+                    activeIcon: Icons.home_rounded,
+                    inactiveIcon: Icons.home_outlined,
                     label: 'Home',
                   ),
-                  NavigationDestination(
-                    icon: Icon(Icons.calculate_outlined),
-                    selectedIcon: Icon(Icons.calculate_rounded),
+                  _destination(
+                    selected: _currentIndex == 1,
+                    activeIcon: Icons.calculate_rounded,
+                    inactiveIcon: Icons.calculate_outlined,
                     label: 'Calculator',
                   ),
-                  NavigationDestination(
-                    icon: Icon(Icons.bookmark_border_rounded),
-                    selectedIcon: Icon(Icons.bookmark_rounded),
+                  _destination(
+                    selected: _currentIndex == 2,
+                    activeIcon: Icons.bookmark_rounded,
+                    inactiveIcon: Icons.bookmark_border_rounded,
                     label: 'Saved',
                   ),
-                  NavigationDestination(
-                    icon: Icon(Icons.settings_outlined),
-                    selectedIcon: Icon(Icons.settings_rounded),
+                  _destination(
+                    selected: _currentIndex == 3,
+                    activeIcon: Icons.settings_rounded,
+                    inactiveIcon: Icons.settings_outlined,
                     label: 'Settings',
                   ),
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  NavigationDestination _destination({
+    required bool selected,
+    required IconData activeIcon,
+    required IconData inactiveIcon,
+    required String label,
+  }) {
+    return NavigationDestination(
+      label: label,
+      icon: Icon(inactiveIcon),
+      selectedIcon: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppTheme.primary.withOpacity(0.28),
+              AppTheme.cyan.withOpacity(0.18),
+            ],
+          ),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.14),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withOpacity(0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Icon(
+          activeIcon,
+          color: Colors.white,
+          size: 23,
         ),
       ),
     );
@@ -146,37 +191,43 @@ class _PremiumBackground extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF0E2347),
-            Color(0xFF09182F),
-            Color(0xFF050C19),
-            Color(0xFF02050E),
+            Color(0xFF0D2042),
+            Color(0xFF09172D),
+            Color(0xFF050B17),
+            Color(0xFF02050D),
           ],
-          stops: [0.0, 0.30, 0.72, 1.0],
+          stops: [0.0, 0.28, 0.70, 1.0],
         ),
       ),
       child: Stack(
         children: [
           Positioned.fill(
             child: CustomPaint(
-              painter: _StructuredBackgroundPainter(),
+              painter: _PremiumGridPainter(),
             ),
           ),
           Positioned(
-            top: -90,
-            right: -40,
+            top: -100,
+            left: -70,
             child: _edgeGlow(
-              width: 180,
-              height: 180,
-              color: const Color(0xFF35CFFF).withOpacity(0.10),
+              size: 180,
+              color: AppTheme.primary.withOpacity(0.10),
+            ),
+          ),
+          Positioned(
+            top: 70,
+            right: -70,
+            child: _edgeGlow(
+              size: 150,
+              color: AppTheme.cyan.withOpacity(0.07),
             ),
           ),
           Positioned(
             bottom: 120,
-            left: -60,
+            right: -80,
             child: _edgeGlow(
-              width: 160,
-              height: 160,
-              color: const Color(0xFF6E63FF).withOpacity(0.08),
+              size: 170,
+              color: AppTheme.violet.withOpacity(0.06),
             ),
           ),
         ],
@@ -185,16 +236,15 @@ class _PremiumBackground extends StatelessWidget {
   }
 
   Widget _edgeGlow({
-    required double width,
-    required double height,
+    required double size,
     required Color color,
   }) {
     return IgnorePointer(
       child: ImageFiltered(
         imageFilter: ImageFilter.blur(sigmaX: 36, sigmaY: 36),
         child: Container(
-          width: width,
-          height: height,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color,
@@ -205,118 +255,99 @@ class _PremiumBackground extends StatelessWidget {
   }
 }
 
-class _StructuredBackgroundPainter extends CustomPainter {
+class _PremiumGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final softLine = Paint()
+    final lineSoft = Paint()
       ..color = Colors.white.withOpacity(0.028)
       ..strokeWidth = 1;
 
-    final softerLine = Paint()
-      ..color = Colors.white.withOpacity(0.014)
+    final lineSofter = Paint()
+      ..color = Colors.white.withOpacity(0.012)
       ..strokeWidth = 1;
 
-    final accentLine = Paint()
-      ..color = const Color(0xFF6CB6FF).withOpacity(0.06)
-      ..strokeWidth = 1.2;
+    final accent = Paint()
+      ..color = AppTheme.primary.withOpacity(0.045)
+      ..strokeWidth = 1.1
+      ..style = PaintingStyle.stroke;
 
-    final topBeam = Paint()
+    final beamPaint = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Color(0x22FFFFFF),
+          Color(0x18FFFFFF),
           Color(0x00FFFFFF),
         ],
       ).createShader(
-        Rect.fromLTWH(0, 0, size.width * 0.42, size.height * 0.22),
+        Rect.fromLTWH(0, 0, size.width * 0.48, size.height * 0.26),
       );
 
     final beamPath = Path()
       ..moveTo(0, 0)
-      ..lineTo(size.width * 0.38, 0)
-      ..lineTo(size.width * 0.21, size.height * 0.28)
-      ..lineTo(0, size.height * 0.40)
+      ..lineTo(size.width * 0.34, 0)
+      ..lineTo(size.width * 0.16, size.height * 0.34)
+      ..lineTo(0, size.height * 0.46)
       ..close();
 
-    canvas.drawPath(beamPath, topBeam);
-
-    final rightShapePaint = Paint()
-      ..color = const Color(0xFF33D6FF).withOpacity(0.035)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
-
-    final rightShape = Path()
-      ..moveTo(size.width * 0.88, size.height * 0.02)
-      ..quadraticBezierTo(
-        size.width * 1.02,
-        size.height * 0.14,
-        size.width * 0.92,
-        size.height * 0.32,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.84,
-        size.height * 0.18,
-        size.width * 0.88,
-        size.height * 0.02,
-      )
-      ..close();
-
-    canvas.drawPath(rightShape, rightShapePaint);
+    canvas.drawPath(beamPath, beamPaint);
 
     canvas.drawLine(
       Offset(size.width * 0.08, size.height * 0.12),
-      Offset(size.width * 0.80, size.height * 0.12),
-      softLine,
+      Offset(size.width * 0.78, size.height * 0.12),
+      lineSoft,
     );
 
     canvas.drawLine(
-      Offset(size.width * 0.18, size.height * 0.52),
-      Offset(size.width * 0.92, size.height * 0.52),
-      softerLine,
+      Offset(size.width * 0.16, size.height * 0.34),
+      Offset(size.width * 0.92, size.height * 0.34),
+      lineSofter,
     );
 
     canvas.drawLine(
-      Offset(size.width * 0.24, size.height * 0.82),
-      Offset(size.width * 0.94, size.height * 0.82),
-      softerLine,
+      Offset(size.width * 0.24, size.height * 0.70),
+      Offset(size.width * 0.94, size.height * 0.70),
+      lineSofter,
     );
 
-    final arcRect1 = Rect.fromCircle(
-      center: Offset(size.width * 0.92, size.height * 0.10),
-      radius: 62,
-    );
-    final arcRect2 = Rect.fromCircle(
-      center: Offset(size.width * 0.92, size.height * 0.10),
-      radius: 44,
-    );
-    final arcRect3 = Rect.fromCircle(
-      center: Offset(size.width * 0.08, size.height * 0.86),
+    final arc1 = Rect.fromCircle(
+      center: Offset(size.width * 0.94, size.height * 0.16),
       radius: 58,
     );
+    final arc2 = Rect.fromCircle(
+      center: Offset(size.width * 0.10, size.height * 0.86),
+      radius: 54,
+    );
 
+    canvas.drawArc(arc1, 3.6, 1.3, false, accent);
     canvas.drawArc(
-      arcRect1,
-      3.5,
-      1.4,
-      false,
-      accentLine,
-    );
-    canvas.drawArc(
-      arcRect2,
-      3.5,
-      1.4,
-      false,
-      accentLine..color = const Color(0xFF35CFFF).withOpacity(0.045),
-    );
-    canvas.drawArc(
-      arcRect3,
-      5.2,
-      1.2,
+      arc2,
+      5.1,
+      1.25,
       false,
       Paint()
-        ..color = const Color(0xFF7A63FF).withOpacity(0.040)
-        ..strokeWidth = 1.2
+        ..color = AppTheme.violet.withOpacity(0.04)
+        ..strokeWidth = 1.1
         ..style = PaintingStyle.stroke,
+    );
+
+    final rightShard = Path()
+      ..moveTo(size.width * 0.86, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height * 0.24)
+      ..quadraticBezierTo(
+        size.width * 0.88,
+        size.height * 0.18,
+        size.width * 0.86,
+        0,
+      )
+      ..close();
+
+    canvas.drawPath(
+      rightShard,
+      Paint()
+        ..color = AppTheme.cyan.withOpacity(0.028)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
   }
 

@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color background = Color(0xFF050B18);
-  static const Color backgroundSoft = Color(0xFF091325);
+  static const Color background = Color(0xFF050B16);
+  static const Color backgroundSoft = Color(0xFF0A1630);
 
-  static const Color surface = Color(0xCC0B1830);
-  static const Color surfaceAlt = Color(0xFF12203A);
+  static const Color surface = Color(0xFF101A2B);
+  static const Color surfaceAlt = Color(0xFF14233B);
 
-  static const Color primary = Color(0xFF63A4FF);
-  static const Color cyan = Color(0xFF49D6FF);
-  static const Color violet = Color(0xFF7A5CFF);
+  static const Color primary = Color(0xFF69A8FF);
+  static const Color cyan = Color(0xFF46D7FF);
+  static const Color violet = Color(0xFF7A67FF);
 
-  static const Color textPrimary = Color(0xFFF4F7FF);
-  static const Color textMuted = Color(0xFFAAB6D1);
-  static const Color textSoft = Color(0xFF7E8CAA);
+  static const Color textPrimary = Color(0xFFF5F8FF);
+  static const Color textMuted = Color(0xFFA8B4CE);
+  static const Color textSoft = Color(0xFF8090AF);
 
-  static const Color border = Color(0xFF1D3358);
-  static const Color borderStrong = Color(0xFF29487A);
+  static const Color border = Color(0xFF24395F);
+  static const Color borderStrong = Color(0xFF31538A);
 
   static ThemeData get darkTheme {
     final base = ThemeData.dark(useMaterial3: true);
@@ -45,19 +45,15 @@ class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-          side: const BorderSide(
-            color: border,
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(30),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: const Color(0xF0000614),
-        indicatorColor: primary.withOpacity(0.16),
-        height: 78,
-        shadowColor: Colors.black.withOpacity(0.22),
+        backgroundColor: Colors.transparent,
+        indicatorColor: Colors.transparent,
+        height: 82,
         surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
             color: states.contains(WidgetState.selected)
@@ -65,8 +61,9 @@ class AppTheme {
                 : textSoft,
             fontSize: 12,
             fontWeight: states.contains(WidgetState.selected)
-                ? FontWeight.w700
+                ? FontWeight.w800
                 : FontWeight.w600,
+            letterSpacing: -0.1,
           ),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
@@ -80,7 +77,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceAlt.withOpacity(0.9),
+        fillColor: surfaceAlt.withOpacity(0.94),
         hintStyle: const TextStyle(
           color: textSoft,
           fontSize: 14,
@@ -105,7 +102,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(
             color: primary,
-            width: 1.3,
+            width: 1.25,
           ),
         ),
       ),
@@ -113,9 +110,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: textPrimary,
-          disabledBackgroundColor: primary.withOpacity(0.35),
-          disabledForegroundColor: textPrimary.withOpacity(0.7),
-          minimumSize: const Size.fromHeight(58),
+          minimumSize: const Size.fromHeight(60),
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -133,7 +128,7 @@ class AppTheme {
           foregroundColor: textPrimary,
           minimumSize: const Size.fromHeight(56),
           side: BorderSide(
-            color: borderStrong.withOpacity(0.9),
+            color: borderStrong.withOpacity(0.85),
             width: 1,
           ),
           shape: RoundedRectangleBorder(
@@ -146,7 +141,7 @@ class AppTheme {
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF0D1B33),
+        backgroundColor: const Color(0xFF0D1A31),
         contentTextStyle: const TextStyle(
           color: textPrimary,
           fontWeight: FontWeight.w600,
