@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,11 +27,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
       TextEditingController(text: '1');
   final TextEditingController _sellingPriceController =
       TextEditingController(text: '0');
+  final ScrollController _scrollController = ScrollController();
 
   String _selectedCurrencyCode = 'USD';
   bool _isSaving = false;
   String? _editingRecipeId;
   DateTime? _loadedAt;
+  double _scrollOffset = 0;
 
   final List<_CurrencyOption> _currencies = const [
     _CurrencyOption(code: 'USD', symbol: '\$'),
@@ -55,6 +58,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_handleScroll);
+
     if (widget.initialRecipe != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadRecipeIntoForm(widget.initialRecipe!);
@@ -62,8 +67,18 @@ class _CalculatorPageState extends State<CalculatorPage> {
     }
   }
 
+  void _handleScroll() {
+    final next = _scrollController.hasClients ? _scrollController.offset : 0.0;
+    if ((next - _scrollOffset).abs() > 1) {
+      setState(() {
+        _scrollOffset = next;
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.dispose();
     _recipeNameController.dispose();
     _servingsController.dispose();
     _sellingPriceController.dispose();
@@ -116,8 +131,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
 
   String get _currencyPrefix {
     return selectedCurrency.code == 'DKK'
-        ? 'DKK '
-        : '${selectedCurrency.symbol}';
+        ? '${selectedCurrency.symbol} '
+        : '${selectedCurrency.symbol} ';
   }
 
   String get _recipeName {
@@ -125,63 +140,11 @@ class _CalculatorPageState extends State<CalculatorPage> {
     return value.isEmpty ? 'Untitled recipe' : value;
   }
 
-  void _clearForm() {
-    _recipeNameController.text = '';
-    _servingsController.text = '1';
-    _sellingPriceController.text = '0';
-    _selectedCurrencyCode = 'USD';
-    _editingRecipeId = null;
-    _loadedAt = null;
-
-    for (final ingredient in _ingredients) {
-      ingredient.dispose();
+  String _money(double value) {
+    if (selectedCurrency.code == 'DKK') {
+      return '${value.toStringAsFixed(2)} ${selectedCurrency.symbol}';
     }
-    _ingredients
-      ..clear()
-      ..add(IngredientRowData());
-  }
-
-  void _loadRecipeIntoForm(Map<String, dynamic> recipe) {
-    final ingredients =
-        (recipe['ingredients'] as List<dynamic>? ?? const <dynamic>[]);
-
-    setState(() {
-      _clearForm();
-
-      _editingRecipeId = recipe['id']?.toString();
-      final createdAtRaw = recipe['createdAt']?.toString();
-      if (createdAtRaw != null && createdAtRaw.isNotEmpty) {
-        _loadedAt = DateTime.tryParse(createdAtRaw);
-      }
-
-      _recipeNameController.text = (recipe['name'] ?? '').toString();
-      _selectedCurrencyCode = (recipe['currencyCode'] ?? 'USD').toString();
-      _servingsController.text = (recipe['servings'] ?? 1).toString();
-
-      final sellingPrice =
-          (recipe['sellingPricePerDish'] as num?)?.toDouble() ?? 0;
-      _sellingPriceController.text =
-          sellingPrice == 0 ? '0' : sellingPrice.toStringAsFixed(2);
-
-      _ingredients.clear();
-
-      if (ingredients.isEmpty) {
-        _ingredients.add(IngredientRowData());
-      } else {
-        for (final item in ingredients) {
-          final map = Map<String, dynamic>.from(item as Map);
-          _ingredients.add(
-            IngredientRowData.fromMap(map),
-          );
-        }
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Recipe loaded into calculator.'),
-      ),
-    );
+    return '${selectedCurrency.symbol}${value.toStringAsFixed(2)}';
   }
 
   void _addIngredient() {
@@ -191,45 +154,69 @@ class _CalculatorPageState extends State<CalculatorPage> {
   }
 
   void _removeIngredient(int index) {
-    if (_ingredients.length == 1) return;
+    if (_ingredients.length == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('At least one ingredient row must remain.'),
+        ),
+      );
+      return;
+    }
 
     setState(() {
-      _ingredients[index].dispose();
-      _ingredients.removeAt(index);
+      final ingredient = _ingredients.removeAt(index);
+      ingredient.dispose();
     });
   }
 
-  String _money(double value) {
-    final symbol = selectedCurrency.symbol;
-    final formatted = value.toStringAsFixed(2);
+  void _loadRecipeIntoForm(Map<String, dynamic> recipe) {
+    _recipeNameController.text = (recipe['name'] ?? '').toString();
+    _selectedCurrencyCode = (recipe['currencyCode'] ?? 'USD').toString();
+    _servingsController.text = (recipe['servings'] ?? 1).toString();
+    _sellingPriceController.text =
+        (recipe['sellingPricePerDish'] ?? 0).toString();
 
-    if (selectedCurrency.code == 'DKK') {
-      return '$symbol $formatted';
+    _editingRecipeId = recipe['id']?.toString();
+    _loadedAt = DateTime.tryParse(
+      (recipe['updatedAt'] ?? recipe['createdAt'] ?? '').toString(),
+    );
+
+    for (final ingredient in _ingredients) {
+      ingredient.dispose();
     }
+    _ingredients.clear();
 
-    return '$symbol$formatted';
+    final ingredients = (recipe['ingredients'] as List<dynamic>? ?? [])
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .map(IngredientRowData.fromMap)
+        .toList();
+
+    _ingredients.addAll(
+      ingredients.isEmpty ? [IngredientRowData()] : ingredients,
+    );
+
+    setState(() {});
   }
 
   _FoodCostStatus get foodCostStatus {
-    final value = foodCostPercent;
-
-    if (sellingPricePerDish <= 0 || servings <= 0) {
+    if (foodCostPercent <= 0) {
       return const _FoodCostStatus(
-        label: 'Add valid values',
-        color: Color(0xFF7C8AA5),
-        background: Color(0x142A3342),
+        label: 'Waiting for inputs',
+        color: Color(0xFF7C9BFF),
+        background: Color(0x147C9BFF),
       );
     }
 
-    if (value <= 30) {
+    if (foodCostPercent <= 28) {
       return const _FoodCostStatus(
         label: 'Healthy margin',
-        color: Color(0xFF4ADE80),
-        background: Color(0x1434D399),
+        color: Color(0xFF4FACC1),
+        background: Color(0x144FACC1),
       );
     }
 
-    if (value <= 35) {
+    if (foodCostPercent <= 35) {
       return const _FoodCostStatus(
         label: 'Watch closely',
         color: Color(0xFFFACC15),
@@ -342,27 +329,16 @@ class _CalculatorPageState extends State<CalculatorPage> {
     final status = foodCostStatus;
 
     return ListView(
+      controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
       children: [
-        Text(
-          isEditingExistingRecipe ? 'Edit Recipe' : 'Calculator',
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
+        _CalculatorHero(
+          isEditing: isEditingExistingRecipe,
+          loadedAt: _loadedAt,
+          recipeName: _recipeNameController.text.trim(),
+          scrollOffset: _scrollOffset,
         ),
-        const SizedBox(height: 8),
-        Text(
-          isEditingExistingRecipe
-              ? 'Update the saved recipe and overwrite the existing version.'
-              : 'Build a quick recipe costing calculation.',
-          style: const TextStyle(
-            color: AppTheme.textMuted,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
         AppCard(
           child: Column(
             children: [
@@ -426,12 +402,34 @@ class _CalculatorPageState extends State<CalculatorPage> {
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Ingredients',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Ingredients',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                color: AppTheme.surfaceAlt.withOpacity(0.88),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Text(
+                '${_ingredients.length} rows',
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         ...List.generate(_ingredients.length, (index) {
@@ -741,6 +739,170 @@ class _ResultRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CalculatorHero extends StatelessWidget {
+  final bool isEditing;
+  final DateTime? loadedAt;
+  final String recipeName;
+  final double scrollOffset;
+
+  const _CalculatorHero({
+    required this.isEditing,
+    required this.loadedAt,
+    required this.recipeName,
+    required this.scrollOffset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final parallax = math.min(scrollOffset * 0.18, 18.0);
+
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
+      child: SizedBox(
+        height: 198,
+        child: Stack(
+          children: [
+            Positioned(
+              right: -14,
+              top: -20 + parallax,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.12,
+                  child: Container(
+                    width: 132,
+                    height: 132,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          const Color(0xFF3B82F6).withOpacity(0.22),
+                          const Color(0xFF22D3EE).withOpacity(0.12),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 6,
+              top: 18 + (parallax * 0.55),
+              child: IgnorePointer(
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFF3B82F6),
+                        Color(0xFF22D3EE),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF3B82F6).withOpacity(0.20),
+                        blurRadius: 26,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.calculate_rounded,
+                    size: 34,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _HeroTag(
+                  label: isEditing ? 'Editing saved recipe' : 'Recipe costing',
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isEditing
+                      ? (recipeName.isNotEmpty ? recipeName : 'Edit recipe')
+                      : 'Calculator',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  isEditing
+                      ? 'Update the saved recipe and overwrite the existing version.'
+                      : 'Build a quick recipe costing calculation with clean pricing visibility and a sharper UnderStack-style flow.',
+                  style: const TextStyle(
+                    color: AppTheme.textMuted,
+                    height: 1.55,
+                  ),
+                ),
+                if (loadedAt != null) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    'Loaded recipe • ${_formatLoadedAt(loadedAt!)}',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.72),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _formatLoadedAt(DateTime value) {
+    final d = value.day.toString().padLeft(2, '0');
+    final m = value.month.toString().padLeft(2, '0');
+    final y = value.year.toString();
+    final h = value.hour.toString().padLeft(2, '0');
+    final min = value.minute.toString().padLeft(2, '0');
+    return '$d/$m/$y · $h:$min';
+  }
+}
+
+class _HeroTag extends StatelessWidget {
+  final String label;
+
+  const _HeroTag({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: const Color(0xFF0E1F3D).withOpacity(0.92),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.08),
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.90),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.1,
+        ),
       ),
     );
   }
