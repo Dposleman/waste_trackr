@@ -2,8 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../app_theme.dart';
-
 class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -13,7 +11,7 @@ class AppCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(20),
-    this.radius = 28,
+    this.radius = 30,
   });
 
   @override
@@ -21,44 +19,76 @@ class AppCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
-            color: const Color(0x99101A2B),
+            color: const Color(0x66111C2E),
             border: Border.all(
-              color: Colors.white.withOpacity(0.10),
+              color: Colors.white.withOpacity(0.11),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.24),
-                blurRadius: 30,
-                offset: const Offset(0, 14),
+                color: Colors.black.withOpacity(0.18),
+                blurRadius: 26,
+                offset: const Offset(0, 12),
               ),
               BoxShadow(
-                color: AppTheme.primary.withOpacity(0.05),
-                blurRadius: 18,
-                offset: const Offset(0, 0),
+                color: Colors.white.withOpacity(0.015),
+                blurRadius: 1,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(radius),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withOpacity(0.06),
-                  Colors.white.withOpacity(0.015),
-                ],
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 1,
+                child: Container(
+                  color: Colors.white.withOpacity(0.08),
+                ),
               ),
-            ),
-            child: Padding(
-              padding: padding,
-              child: child,
-            ),
+              Positioned(
+                top: -40,
+                left: -20,
+                child: Container(
+                  width: 140,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(radius),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withOpacity(0.07),
+                        Colors.white.withOpacity(0.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.035),
+                      Colors.white.withOpacity(0.012),
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: padding,
+                  child: child,
+                ),
+              ),
+            ],
           ),
         ),
       ),

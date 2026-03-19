@@ -76,22 +76,22 @@ class _MainShellState extends State<MainShell> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(32),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                color: const Color(0xAA07111F),
+                borderRadius: BorderRadius.circular(32),
+                color: const Color(0x70061222),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withOpacity(0.09),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.30),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
+                    color: Colors.black.withOpacity(0.24),
+                    blurRadius: 28,
+                    offset: const Offset(0, 14),
                   ),
                 ],
               ),
@@ -142,63 +142,64 @@ class _PremiumBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.85, -1.0),
-          radius: 1.6,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
-            Color(0xFF132D61),
-            Color(0xFF08172F),
-            Color(0xFF030814),
+            Color(0xFF102650),
+            Color(0xFF091A35),
+            Color(0xFF040B18),
+            Color(0xFF020611),
           ],
-          stops: [0.0, 0.42, 1.0],
+          stops: [0.0, 0.26, 0.70, 1.0],
         ),
       ),
       child: Stack(
         children: [
           Positioned(
-            top: -120,
+            top: -150,
             left: -120,
-            child: _blurOrb(
-              size: 280,
-              color: const Color(0xFF58A6FF).withOpacity(0.24),
+            child: _orb(
+              size: 320,
+              color: const Color(0xFF5CA8FF).withOpacity(0.26),
             ),
           ),
           Positioned(
-            top: 40,
-            right: -110,
-            child: _blurOrb(
-              size: 240,
-              color: const Color(0xFF33D6FF).withOpacity(0.14),
+            top: -10,
+            right: -100,
+            child: _orb(
+              size: 250,
+              color: const Color(0xFF2DD6FF).withOpacity(0.14),
             ),
           ),
           Positioned(
             top: 280,
-            left: -100,
-            child: _blurOrb(
-              size: 220,
-              color: const Color(0xFF6E6BFF).withOpacity(0.10),
+            left: -120,
+            child: _orb(
+              size: 240,
+              color: const Color(0xFF7B61FF).withOpacity(0.11),
             ),
           ),
           Positioned(
-            bottom: 140,
-            right: -120,
-            child: _blurOrb(
-              size: 260,
-              color: const Color(0xFF25C8FF).withOpacity(0.10),
+            bottom: 180,
+            right: -130,
+            child: _orb(
+              size: 280,
+              color: const Color(0xFF1FC8FF).withOpacity(0.10),
             ),
           ),
           Positioned(
-            bottom: -60,
-            left: -80,
-            child: _blurOrb(
+            bottom: -80,
+            left: -40,
+            child: _orb(
               size: 220,
-              color: const Color(0xFF7A5CFF).withOpacity(0.08),
+              color: const Color(0xFF6F5BFF).withOpacity(0.08),
             ),
           ),
           Positioned.fill(
             child: IgnorePointer(
               child: CustomPaint(
-                painter: _SoftMeshPainter(),
+                painter: _AmbientPainter(),
               ),
             ),
           ),
@@ -207,12 +208,12 @@ class _PremiumBackground extends StatelessWidget {
     );
   }
 
-  Widget _blurOrb({
+  Widget _orb({
     required double size,
     required Color color,
   }) {
     return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+      imageFilter: ImageFilter.blur(sigmaX: 52, sigmaY: 52),
       child: Container(
         width: size,
         height: size,
@@ -225,62 +226,71 @@ class _PremiumBackground extends StatelessWidget {
   }
 }
 
-class _SoftMeshPainter extends CustomPainter {
+class _AmbientPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final path1 = Path()
-      ..moveTo(size.width * 0.68, 0)
+    final topGlow = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0x18FFFFFF),
+          Color(0x00FFFFFF),
+        ],
+      ).createShader(
+        Rect.fromLTWH(0, 0, size.width * 0.55, size.height * 0.22),
+      )
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
+
+    final topPath = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width * 0.52, 0)
       ..quadraticBezierTo(
-        size.width * 0.94,
+        size.width * 0.28,
         size.height * 0.10,
-        size.width,
-        size.height * 0.28,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-
-    final paint1 = Paint()
-      ..color = Colors.white.withOpacity(0.018)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30);
-
-    canvas.drawPath(path1, paint1);
-
-    final path2 = Path()
-      ..moveTo(0, size.height * 0.42)
-      ..quadraticBezierTo(
-        size.width * 0.16,
-        size.height * 0.36,
-        size.width * 0.24,
-        size.height * 0.52,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.12,
-        size.height * 0.62,
         0,
-        size.height * 0.58,
+        size.height * 0.18,
       )
       ..close();
 
-    final paint2 = Paint()
-      ..color = AppTheme.primary.withOpacity(0.035)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 35);
+    canvas.drawPath(topPath, topGlow);
 
-    canvas.drawPath(path2, paint2);
+    final rightGlow = Paint()
+      ..color = const Color(0x22A7E8FF)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);
+
+    final rightPath = Path()
+      ..moveTo(size.width * 0.82, size.height * 0.10)
+      ..quadraticBezierTo(
+        size.width * 1.02,
+        size.height * 0.18,
+        size.width * 0.90,
+        size.height * 0.34,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.78,
+        size.height * 0.22,
+        size.width * 0.82,
+        size.height * 0.10,
+      )
+      ..close();
+
+    canvas.drawPath(rightPath, rightGlow);
 
     final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.03)
+      ..color = Colors.white.withOpacity(0.022)
       ..strokeWidth = 1;
 
     canvas.drawLine(
-      Offset(size.width * 0.10, size.height * 0.16),
-      Offset(size.width * 0.78, size.height * 0.16),
+      Offset(size.width * 0.08, size.height * 0.14),
+      Offset(size.width * 0.78, size.height * 0.14),
       linePaint,
     );
 
     canvas.drawLine(
-      Offset(size.width * 0.22, size.height * 0.78),
-      Offset(size.width * 0.92, size.height * 0.78),
-      linePaint..color = Colors.white.withOpacity(0.018),
+      Offset(size.width * 0.22, size.height * 0.82),
+      Offset(size.width * 0.94, size.height * 0.82),
+      linePaint..color = Colors.white.withOpacity(0.012),
     );
   }
 
