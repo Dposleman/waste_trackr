@@ -6,7 +6,14 @@ import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
 
 class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key});
+  final VoidCallback? onDataChanged;
+  final int refreshToken;
+
+  const HistoryPage({
+    super.key,
+    this.onDataChanged,
+    required this.refreshToken,
+  });
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -38,11 +45,28 @@ class _HistoryPageState extends State<HistoryPage> {
     'Other',
   ];
 
+  static const List<String> _units = [
+    'kg',
+    'g',
+    'l',
+    'ml',
+    'pcs',
+    'portions',
+  ];
+
   @override
   void initState() {
     super.initState();
     _entriesFuture = WasteStorageService.getEntries();
     _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void didUpdateWidget(covariant HistoryPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshToken != widget.refreshToken) {
+      _entriesFuture = WasteStorageService.getEntries();
+    }
   }
 
   @override
@@ -65,9 +89,269 @@ class _HistoryPageState extends State<HistoryPage> {
 
     if (!mounted) return;
 
+    widget.onDataChanged?.call();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Deleted ${entry.itemName}.'),
+      ),
+    );
+
+    await _refresh();
+  }
+
+  Future<void> _editEntry(WasteEntry entry) async {
+    final itemController = TextEditingController(text: entry.itemName);
+    final categoryController = TextEditingController(text: entry.category);
+    final quantityController =
+        TextEditingController(text: entry.quantity.toString());
+    final unitCostController =
+        TextEditingController(text: entry.unitCost.toString());
+    final noteController = TextEditingController(text: entry.note ?? '');
+
+    String selectedUnit = entry.unit;
+    String selectedReason = entry.reason;
+    DateTime selectedDate = entry.date;
+
+    final formKey = GlobalKey<FormState>();
+
+    final updatedEntry = await showModalBottomSheet<WasteEntry>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            Future<void> pickDate() async {
+              final result = await showDatePicker(
+                context: context,
+                initialDate: selectedDate,
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2032),
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: Theme.of(context).colorScheme.copyWith(
+                            primary: AppTheme.primary,
+                          ),
+                    ),
+                    child: child!,
+                  );
+                },
+              );
+
+              if (result != null) {
+                setModalState(() => selectedDate = result);
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              ),
+              child: AppCard(
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Edit entry',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: itemController,
+                          decoration: const InputDecoration(
+                            labelText: 'Item name',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Enter an item name';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: categoryController,
+                          decoration: const InputDecoration(
+                            labelText: 'Category',
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: quantityController,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                                decoration: const InputDecoration(
+                                  labelText: 'Quantity',
+                                ),
+                                validator: (value) {
+                                  final parsed = double.tryParse(value ?? '');
+                                  if (parsed == null || parsed <= 0) {
+                                    return 'Invalid quantity';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                initialValue: selectedUnit,
+                                decoration: const InputDecoration(
+                                  labelText: 'Unit',
+                                ),
+                                items: _units
+                                    .map(
+                                      (unit) => DropdownMenuItem<String>(
+                                        value: unit,
+                                        child: Text(unit),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setModalState(() => selectedUnit = value);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: unitCostController,
+                          keyboardType:
+                              const TextInputType.numberWithOptions(decimal: true),
+                          decoration: const InputDecoration(
+                            labelText: 'Unit cost',
+                            prefixText: '€ ',
+                          ),
+                          validator: (value) {
+                            final parsed = double.tryParse(value ?? '');
+                            if (parsed == null || parsed < 0) {
+                              return 'Invalid cost';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        DropdownButtonFormField<String>(
+                          initialValue: selectedReason,
+                          decoration: const InputDecoration(
+                            labelText: 'Waste reason',
+                          ),
+                          items: _reasonOptions
+                              .where((reason) => reason != 'All')
+                              .map(
+                                (reason) => DropdownMenuItem<String>(
+                                  value: reason,
+                                  child: Text(reason),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setModalState(() => selectedReason = value);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        InkWell(
+                          onTap: pickDate,
+                          borderRadius: BorderRadius.circular(18),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Date',
+                            ),
+                            child: Text(
+                              '${selectedDate.day.toString().padLeft(2, '0')}/'
+                              '${selectedDate.month.toString().padLeft(2, '0')}/'
+                              '${selectedDate.year}',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: noteController,
+                          minLines: 3,
+                          maxLines: 5,
+                          decoration: const InputDecoration(
+                            labelText: 'Note',
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        FilledButton(
+                          onPressed: () {
+                            if (!formKey.currentState!.validate()) return;
+
+                            final quantity =
+                                double.tryParse(quantityController.text) ?? 0;
+                            final unitCost =
+                                double.tryParse(unitCostController.text) ?? 0;
+
+                            Navigator.of(context).pop(
+                              WasteEntry(
+                                id: entry.id,
+                                itemName: itemController.text.trim(),
+                                category: categoryController.text.trim(),
+                                quantity: quantity,
+                                unit: selectedUnit,
+                                unitCost: unitCost,
+                                reason: selectedReason,
+                                date: DateTime(
+                                  selectedDate.year,
+                                  selectedDate.month,
+                                  selectedDate.day,
+                                ),
+                                note: noteController.text.trim().isEmpty
+                                    ? null
+                                    : noteController.text.trim(),
+                                createdAt: entry.createdAt,
+                              ),
+                            );
+                          },
+                          child: const Text('Save changes'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    itemController.dispose();
+    categoryController.dispose();
+    quantityController.dispose();
+    unitCostController.dispose();
+    noteController.dispose();
+
+    if (updatedEntry == null) return;
+
+    await WasteStorageService.updateEntry(updatedEntry);
+
+    if (!mounted) return;
+
+    widget.onDataChanged?.call();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Updated ${updatedEntry.itemName}.'),
       ),
     );
 
@@ -135,7 +419,7 @@ class _HistoryPageState extends State<HistoryPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Review saved waste entries, filter them, and remove records you no longer need.',
+                'Review saved waste entries, filter them, edit them, and remove records you no longer need.',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: AppTheme.textMuted,
                 ),
@@ -267,6 +551,7 @@ class _HistoryPageState extends State<HistoryPage> {
                     child: _HistoryEntryCard(
                       entry: entry,
                       onDelete: () => _deleteEntry(entry),
+                      onEdit: () => _editEntry(entry),
                     ),
                   ),
                 ),
@@ -311,10 +596,12 @@ class _SummaryStat extends StatelessWidget {
 class _HistoryEntryCard extends StatelessWidget {
   final WasteEntry entry;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
   const _HistoryEntryCard({
     required this.entry,
     required this.onDelete,
+    required this.onEdit,
   });
 
   @override
@@ -374,13 +661,21 @@ class _HistoryEntryCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
-          Align(
-            alignment: Alignment.centerRight,
-            child: OutlinedButton.icon(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline_rounded, size: 18),
-              label: const Text('Delete'),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton.icon(
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: const Text('Edit'),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton.icon(
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                label: const Text('Delete'),
+              ),
+            ],
           ),
         ],
       ),

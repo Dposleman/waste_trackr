@@ -6,7 +6,12 @@ import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int refreshToken;
+
+  const HomePage({
+    super.key,
+    required this.refreshToken,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -19,6 +24,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _entriesFuture = WasteStorageService.getEntries();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshToken != widget.refreshToken) {
+      _entriesFuture = WasteStorageService.getEntries();
+    }
   }
 
   @override

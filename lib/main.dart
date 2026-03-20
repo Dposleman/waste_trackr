@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
 import 'pages/calculator_page.dart';
+import 'pages/history_page.dart';
 import 'pages/home_page.dart';
 import 'pages/settings_page.dart';
 
@@ -34,13 +35,21 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  int _refreshToken = 0;
+
+  void _notifyDataChanged() {
+    setState(() {
+      _refreshToken++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    const pages = [
-      HomePage(),
-      CalculatorPage(),
-      SettingsPage(),
+    final pages = [
+      HomePage(refreshToken: _refreshToken),
+      CalculatorPage(onEntrySaved: _notifyDataChanged),
+      HistoryPage(onDataChanged: _notifyDataChanged, refreshToken: _refreshToken),
+      const SettingsPage(),
     ];
 
     return Scaffold(
@@ -101,6 +110,11 @@ class _MainShellState extends State<MainShell> {
                       activeIcon: Icons.add_chart_rounded,
                       inactiveIcon: Icons.add_chart_outlined,
                       label: 'Add Entry',
+                    ),
+                    _NavDestination(
+                      activeIcon: Icons.receipt_long_rounded,
+                      inactiveIcon: Icons.receipt_long_outlined,
+                      label: 'History',
                     ),
                     _NavDestination(
                       activeIcon: Icons.settings_rounded,

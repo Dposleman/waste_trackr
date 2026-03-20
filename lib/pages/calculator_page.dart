@@ -6,7 +6,12 @@ import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
 
 class CalculatorPage extends StatefulWidget {
-  const CalculatorPage({super.key});
+  final VoidCallback? onEntrySaved;
+
+  const CalculatorPage({
+    super.key,
+    this.onEntrySaved,
+  });
 
   @override
   State<CalculatorPage> createState() => _CalculatorPageState();
@@ -90,6 +95,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
       await WasteStorageService.addEntry(entry);
 
       if (!mounted) return;
+
+      widget.onEntrySaved?.call();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
