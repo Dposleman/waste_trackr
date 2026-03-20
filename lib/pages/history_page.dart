@@ -6,14 +6,14 @@ import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
 
 class HistoryPage extends StatefulWidget {
-  final VoidCallback? onDataChanged;
-  final int refreshToken;
-
   const HistoryPage({
     super.key,
     this.onDataChanged,
     required this.refreshToken,
   });
+
+  final VoidCallback? onDataChanged;
+  final int refreshToken;
 
   @override
   State<HistoryPage> createState() => _HistoryPageState();
@@ -21,6 +21,7 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   late Future<List<WasteEntry>> _entriesFuture;
+
   final TextEditingController _searchController = TextEditingController();
 
   String _selectedReason = 'All';
@@ -94,7 +95,6 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Future<void> _deleteEntry(WasteEntry entry) async {
     await WasteStorageService.deleteEntry(entry.id);
-
     if (!mounted) return;
 
     widget.onDataChanged?.call();
@@ -192,50 +192,100 @@ class _HistoryPageState extends State<HistoryPage> {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: quantityController,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                  decimal: true,
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final stacked = constraints.maxWidth < 420;
+
+                            if (stacked) {
+                              return Column(
+                                children: [
+                                  TextFormField(
+                                    controller: quantityController,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Quantity',
+                                    ),
+                                    validator: (value) {
+                                      final parsed = double.tryParse(value ?? '');
+                                      if (parsed == null || parsed <= 0) {
+                                        return 'Invalid quantity';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 14),
+                                  DropdownButtonFormField<String>(
+                                    initialValue: selectedUnit,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Unit',
+                                    ),
+                                    items: _units
+                                        .map(
+                                          (unit) => DropdownMenuItem(
+                                            value: unit,
+                                            child: Text(unit),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setModalState(() => selectedUnit = value);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: quantityController,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Quantity',
+                                    ),
+                                    validator: (value) {
+                                      final parsed = double.tryParse(value ?? '');
+                                      if (parsed == null || parsed <= 0) {
+                                        return 'Invalid quantity';
+                                      }
+                                      return null;
+                                    },
+                                  ),
                                 ),
-                                decoration: const InputDecoration(
-                                  labelText: 'Quantity',
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: DropdownButtonFormField<String>(
+                                    initialValue: selectedUnit,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Unit',
+                                    ),
+                                    items: _units
+                                        .map(
+                                          (unit) => DropdownMenuItem(
+                                            value: unit,
+                                            child: Text(unit),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setModalState(() => selectedUnit = value);
+                                      }
+                                    },
+                                  ),
                                 ),
-                                validator: (value) {
-                                  final parsed = double.tryParse(value ?? '');
-                                  if (parsed == null || parsed <= 0) {
-                                    return 'Invalid quantity';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                initialValue: selectedUnit,
-                                decoration: const InputDecoration(
-                                  labelText: 'Unit',
-                                ),
-                                items: _units
-                                    .map(
-                                      (unit) => DropdownMenuItem<String>(
-                                        value: unit,
-                                        child: Text(unit),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setModalState(() => selectedUnit = value);
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
+                              ],
+                            );
+                          },
                         ),
                         const SizedBox(height: 14),
                         TextFormField(
@@ -263,7 +313,7 @@ class _HistoryPageState extends State<HistoryPage> {
                           items: _reasonOptions
                               .where((reason) => reason != 'All')
                               .map(
-                                (reason) => DropdownMenuItem<String>(
+                                (reason) => DropdownMenuItem(
                                   value: reason,
                                   child: Text(reason),
                                 ),
@@ -352,7 +402,6 @@ class _HistoryPageState extends State<HistoryPage> {
     if (updatedEntry == null) return;
 
     await WasteStorageService.updateEntry(updatedEntry);
-
     if (!mounted) return;
 
     widget.onDataChanged?.call();
@@ -390,7 +439,7 @@ class _HistoryPageState extends State<HistoryPage> {
   List<WasteEntry> _applyFilters(List<WasteEntry> entries) {
     final query = _searchController.text.trim().toLowerCase();
 
-    var filtered = entries.where((entry) {
+    final filtered = entries.where((entry) {
       final matchesQuery = query.isEmpty ||
           entry.itemName.toLowerCase().contains(query) ||
           entry.category.toLowerCase().contains(query) ||
@@ -425,7 +474,7 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   double _totalLoss(List<WasteEntry> entries) {
-    return entries.fold<double>(0.0, (sum, entry) => sum + entry.totalLoss);
+    return entries.fold(0.0, (sum, entry) => sum + entry.totalLoss);
   }
 
   @override
@@ -474,64 +523,136 @@ class _HistoryPageState extends State<HistoryPage> {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _selectedReason,
-                            decoration: const InputDecoration(
-                              labelText: 'Reason',
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final singleColumn = constraints.maxWidth < 430;
+
+                        if (singleColumn) {
+                          return Column(
+                            children: [
+                              DropdownButtonFormField<String>(
+                                initialValue: _selectedReason,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Reason',
+                                ),
+                                items: _reasonOptions
+                                    .map(
+                                      (reason) => DropdownMenuItem(
+                                        value: reason,
+                                        child: Text(
+                                          reason,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedReason = value);
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 14),
+                              DropdownButtonFormField<String>(
+                                initialValue: _selectedSort,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Sort',
+                                ),
+                                items: _sortOptions
+                                    .map(
+                                      (sort) => DropdownMenuItem(
+                                        value: sort,
+                                        child: Text(
+                                          sort,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedSort = value);
+                                  }
+                                },
+                              ),
+                            ],
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                initialValue: _selectedReason,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Reason',
+                                ),
+                                items: _reasonOptions
+                                    .map(
+                                      (reason) => DropdownMenuItem(
+                                        value: reason,
+                                        child: Text(
+                                          reason,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedReason = value);
+                                  }
+                                },
+                              ),
                             ),
-                            items: _reasonOptions
-                                .map(
-                                  (reason) => DropdownMenuItem<String>(
-                                    value: reason,
-                                    child: Text(reason),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedReason = value);
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _selectedSort,
-                            decoration: const InputDecoration(
-                              labelText: 'Sort',
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                initialValue: _selectedSort,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  labelText: 'Sort',
+                                ),
+                                items: _sortOptions
+                                    .map(
+                                      (sort) => DropdownMenuItem(
+                                        value: sort,
+                                        child: Text(
+                                          sort,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _selectedSort = value);
+                                  }
+                                },
+                              ),
                             ),
-                            items: _sortOptions
-                                .map(
-                                  (sort) => DropdownMenuItem<String>(
-                                    value: sort,
-                                    child: Text(sort),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedSort = value);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 14),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedDateRange,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Date range',
                       ),
                       items: _dateRangeOptions
                           .map(
-                            (range) => DropdownMenuItem<String>(
+                            (range) => DropdownMenuItem(
                               value: range,
-                              child: Text(range),
+                              child: Text(
+                                range,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           )
                           .toList(),
@@ -545,24 +666,50 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
               ),
               const SizedBox(height: 18),
-              AppCard(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _SummaryStat(
-                        label: 'Entries',
-                        value: '${filtered.length}',
-                      ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final singleColumn = constraints.maxWidth < 360;
+
+                  if (singleColumn) {
+                    return Column(
+                      children: [
+                        AppCard(
+                          child: _SummaryStat(
+                            label: 'Entries',
+                            value: '${filtered.length}',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        AppCard(
+                          child: _SummaryStat(
+                            label: 'Visible loss',
+                            value: '€ ${total.toStringAsFixed(2)}',
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return AppCard(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _SummaryStat(
+                            label: 'Entries',
+                            value: '${filtered.length}',
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _SummaryStat(
+                            label: 'Visible loss',
+                            value: '€ ${total.toStringAsFixed(2)}',
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _SummaryStat(
-                        label: 'Visible loss',
-                        value: '€ ${total.toStringAsFixed(2)}',
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
               const SizedBox(height: 18),
               if (snapshot.connectionState == ConnectionState.waiting)
@@ -615,13 +762,13 @@ class _HistoryPageState extends State<HistoryPage> {
 }
 
 class _SummaryStat extends StatelessWidget {
-  final String label;
-  final String value;
-
   const _SummaryStat({
     required this.label,
     required this.value,
   });
+
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
@@ -637,6 +784,8 @@ class _SummaryStat extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ],
@@ -645,15 +794,15 @@ class _SummaryStat extends StatelessWidget {
 }
 
 class _HistoryEntryCard extends StatelessWidget {
-  final WasteEntry entry;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
-
   const _HistoryEntryCard({
     required this.entry,
     required this.onDelete,
     required this.onEdit,
   });
+
+  final WasteEntry entry;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -671,12 +820,18 @@ class _HistoryEntryCard extends StatelessWidget {
                   style: theme.textTheme.titleLarge,
                 ),
               ),
-              Text(
-                '€ ${entry.totalLoss.toStringAsFixed(2)}',
-                style: theme.textTheme.titleMedium?.copyWith(
-                      color: AppTheme.cyan,
-                      fontWeight: FontWeight.w800,
-                    ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  '€ ${entry.totalLoss.toStringAsFixed(2)}',
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: AppTheme.cyan,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
@@ -685,7 +840,9 @@ class _HistoryEntryCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _Chip(text: entry.category.isEmpty ? 'Uncategorized' : entry.category),
+              _Chip(
+                text: entry.category.isEmpty ? 'Uncategorized' : entry.category,
+              ),
               _Chip(text: entry.reason),
               _Chip(text: '${entry.quantity.toStringAsFixed(2)} ${entry.unit}'),
             ],
@@ -712,15 +869,16 @@ class _HistoryEntryCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 10,
+            runSpacing: 10,
             children: [
               OutlinedButton.icon(
                 onPressed: onEdit,
                 icon: const Icon(Icons.edit_outlined, size: 18),
                 label: const Text('Edit'),
               ),
-              const SizedBox(width: 10),
               OutlinedButton.icon(
                 onPressed: onDelete,
                 icon: const Icon(Icons.delete_outline_rounded, size: 18),
@@ -741,9 +899,9 @@ class _HistoryEntryCard extends StatelessWidget {
 }
 
 class _Chip extends StatelessWidget {
-  final String text;
-
   const _Chip({required this.text});
+
+  final String text;
 
   @override
   Widget build(BuildContext context) {
