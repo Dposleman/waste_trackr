@@ -1,28 +1,29 @@
-# Food Cost Calculator
+# WasteTrackr
 
-Food Cost Calculator is a lightweight Flutter app for chefs, restaurants and food businesses to calculate recipe cost, cost per serving and food cost percentage.
+WasteTrackr is a lightweight Flutter app for chefs, restaurants and food businesses to track food waste, measure financial loss, and build better kitchen control habits.
 
-It is designed as a fast utility app:
-- calculate recipe cost in seconds
-- save recipes locally on device
-- reopen saved recipes in the calculator
-- edit existing recipes
-- duplicate or delete recipes
-- use the app as an entry point toward GastroApp for more advanced restaurant operations
+It is designed as a fast utility app inside the UnderStack ecosystem.
 
-## Core Features
+## Current Goal
 
-- Recipe cost calculation
-- Cost per serving calculation
-- Food cost % calculation
-- Multi-ingredient recipe builder
-- Saved recipes stored locally with SharedPreferences
-- Recipe detail view
-- Reopen saved recipe into calculator
-- Edit saved recipes
-- Duplicate saved recipes
-- Dark UI
-- GastroApp upgrade CTA
+This repository is the MVP base for the second micro-app in the UnderStack utility portfolio.
+
+Current migration stage:
+- premium UnderStack UI reused from the first app
+- simplified 3-tab structure
+- dashboard base ready
+- add-entry screen base ready
+- settings rebranded to WasteTrackr
+
+## Planned Core Features
+
+- Waste entry logging
+- Cost loss calculation
+- Daily and weekly summaries
+- Top wasted item insight
+- Top waste reason insight
+- Local device persistence
+- GastroApp upgrade funnel
 
 ## Tech Stack
 
@@ -30,23 +31,6 @@ It is designed as a fast utility app:
 - Dart
 - SharedPreferences
 - url_launcher
-
-## Project Goal
-
-This app is part of a broader micro-app strategy: small, useful restaurant tools that solve one problem well and can also serve as an acquisition funnel toward GastroApp.
-
-## Current Status
-
-MVP ready.
-
-Current implemented flow:
-1. Create recipe
-2. Add ingredients
-3. Calculate totals
-4. Save recipe
-5. Review saved recipe
-6. Edit and update recipe
-7. Duplicate or delete recipe
 
 ## Folder Structure
 

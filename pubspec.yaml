@@ -1,6 +1,7 @@
-name: food_cost_calculator
-description: "Recipe costing and food cost calculator for chefs, restaurants and food businesses."
+name: waste_trackr
+description: "Waste tracking and loss visibility app for chefs, restaurants and food businesses."
 publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
@@ -20,5 +21,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
   assets:
     - assets/images/understack_logo.png

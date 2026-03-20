@@ -5,20 +5,19 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import 'pages/calculator_page.dart';
 import 'pages/home_page.dart';
-import 'pages/saved_recipes_page.dart';
 import 'pages/settings_page.dart';
 
 void main() {
-  runApp(const FoodCostCalculatorApp());
+  runApp(const WasteTrackrApp());
 }
 
-class FoodCostCalculatorApp extends StatelessWidget {
-  const FoodCostCalculatorApp({super.key});
+class WasteTrackrApp extends StatelessWidget {
+  const WasteTrackrApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Food Cost Calculator',
+      title: 'WasteTrackr',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: const MainShell(),
@@ -35,28 +34,12 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
-  Map<String, dynamic>? _recipeToOpenInCalculator;
-  int _calculatorSeed = 0;
-
-  void _openRecipeInCalculator(Map<String, dynamic> recipe) {
-    setState(() {
-      _recipeToOpenInCalculator = Map<String, dynamic>.from(recipe);
-      _calculatorSeed++;
-      _currentIndex = 1;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
       const HomePage(),
-      CalculatorPage(
-        key: ValueKey('calculator_$_calculatorSeed'),
-        initialRecipe: _recipeToOpenInCalculator,
-      ),
-      SavedRecipesPage(
-        onOpenInCalculator: _openRecipeInCalculator,
-      ),
+      const CalculatorPage(),
       const SettingsPage(),
     ];
 
@@ -110,19 +93,14 @@ class _MainShellState extends State<MainShell> {
                   },
                   destinations: [
                     _destination(
-                      activeIcon: Icons.home_rounded,
-                      inactiveIcon: Icons.home_outlined,
-                      label: 'Home',
+                      activeIcon: Icons.dashboard_rounded,
+                      inactiveIcon: Icons.dashboard_outlined,
+                      label: 'Dashboard',
                     ),
                     _destination(
-                      activeIcon: Icons.calculate_rounded,
-                      inactiveIcon: Icons.calculate_outlined,
-                      label: 'Calculator',
-                    ),
-                    _destination(
-                      activeIcon: Icons.bookmark_rounded,
-                      inactiveIcon: Icons.bookmark_border_rounded,
-                      label: 'Saved',
+                      activeIcon: Icons.add_chart_rounded,
+                      inactiveIcon: Icons.add_chart_outlined,
+                      label: 'Add Entry',
                     ),
                     _destination(
                       activeIcon: Icons.settings_rounded,
