@@ -229,13 +229,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedUnit,
+                          initialValue: _selectedUnit,
                           decoration: const InputDecoration(
                             labelText: 'Unit',
                           ),
                           items: _units
                               .map(
-                                (unit) => DropdownMenuItem(
+                                (unit) => DropdownMenuItem<String>(
                                   value: unit,
                                   child: Text(unit),
                                 ),
@@ -272,13 +272,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
-                    value: _selectedReason,
+                    initialValue: _selectedReason,
                     decoration: const InputDecoration(
                       labelText: 'Waste reason',
                     ),
                     items: _reasons
                         .map(
-                          (reason) => DropdownMenuItem(
+                          (reason) => DropdownMenuItem<String>(
                             value: reason,
                             child: Text(reason),
                           ),

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/waste_entry.dart';
@@ -12,7 +10,7 @@ class WasteStorageService {
     final rawList = prefs.getStringList(_entriesKey) ?? [];
 
     final entries = rawList
-        .map((item) => WasteEntry.fromJson(item))
+        .map(WasteEntry.fromJson)
         .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
 
@@ -57,6 +55,10 @@ class WasteStorageService {
 
   static Future<double> getTotalLoss() async {
     final entries = await getEntries();
-    return entries.fold(0.0, (sum, entry) => sum + entry.totalLoss);
+
+    return entries.fold<double>(
+      0.0,
+      (sum, entry) => sum + entry.totalLoss,
+    );
   }
 }
