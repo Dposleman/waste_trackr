@@ -6,6 +6,7 @@ import 'app_theme.dart';
 import 'pages/calculator_page.dart';
 import 'pages/history_page.dart';
 import 'pages/home_page.dart';
+import 'pages/insights_page.dart';
 import 'pages/settings_page.dart';
 
 void main() {
@@ -49,6 +50,7 @@ class _MainShellState extends State<MainShell> {
       HomePage(refreshToken: _refreshToken),
       CalculatorPage(onEntrySaved: _notifyDataChanged),
       HistoryPage(onDataChanged: _notifyDataChanged, refreshToken: _refreshToken),
+      InsightsPage(refreshToken: _refreshToken),
       const SettingsPage(),
     ];
 
@@ -115,6 +117,11 @@ class _MainShellState extends State<MainShell> {
                       activeIcon: Icons.receipt_long_rounded,
                       inactiveIcon: Icons.receipt_long_outlined,
                       label: 'History',
+                    ),
+                    _NavDestination(
+                      activeIcon: Icons.insights_rounded,
+                      inactiveIcon: Icons.insights_outlined,
+                      label: 'Insights',
                     ),
                     _NavDestination(
                       activeIcon: Icons.settings_rounded,

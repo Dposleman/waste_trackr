@@ -25,6 +25,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   String _selectedReason = 'All';
   String _selectedSort = 'Newest';
+  String _selectedDateRange = 'All time';
 
   static const List<String> _sortOptions = [
     'Newest',
@@ -43,6 +44,13 @@ class _HistoryPageState extends State<HistoryPage> {
     'Returned by customer',
     'Staff mistake',
     'Other',
+  ];
+
+  static const List<String> _dateRangeOptions = [
+    'All time',
+    'Today',
+    'This week',
+    'This month',
   ];
 
   static const List<String> _units = [
@@ -358,6 +366,27 @@ class _HistoryPageState extends State<HistoryPage> {
     await _refresh();
   }
 
+  bool _matchesDateRange(WasteEntry entry) {
+    if (_selectedDateRange == 'All time') return true;
+
+    final now = DateTime.now();
+    final entryDate = DateTime(entry.date.year, entry.date.month, entry.date.day);
+    final today = DateTime(now.year, now.month, now.day);
+
+    switch (_selectedDateRange) {
+      case 'Today':
+        return entryDate == today;
+      case 'This week':
+        final startOfWeek = today.subtract(Duration(days: now.weekday - 1));
+        final endOfWeek = startOfWeek.add(const Duration(days: 7));
+        return !entryDate.isBefore(startOfWeek) && entryDate.isBefore(endOfWeek);
+      case 'This month':
+        return entryDate.year == now.year && entryDate.month == now.month;
+      default:
+        return true;
+    }
+  }
+
   List<WasteEntry> _applyFilters(List<WasteEntry> entries) {
     final query = _searchController.text.trim().toLowerCase();
 
@@ -371,7 +400,9 @@ class _HistoryPageState extends State<HistoryPage> {
       final matchesReason =
           _selectedReason == 'All' || entry.reason == _selectedReason;
 
-      return matchesQuery && matchesReason;
+      final matchesDate = _matchesDateRange(entry);
+
+      return matchesQuery && matchesReason && matchesDate;
     }).toList();
 
     switch (_selectedSort) {
@@ -489,6 +520,26 @@ class _HistoryPageState extends State<HistoryPage> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 14),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedDateRange,
+                      decoration: const InputDecoration(
+                        labelText: 'Date range',
+                      ),
+                      items: _dateRangeOptions
+                          .map(
+                            (range) => DropdownMenuItem<String>(
+                              value: range,
+                              child: Text(range),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedDateRange = value);
+                        }
+                      },
                     ),
                   ],
                 ),
