@@ -37,10 +37,10 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      const HomePage(),
-      const CalculatorPage(),
-      const SettingsPage(),
+    const pages = [
+      HomePage(),
+      CalculatorPage(),
+      SettingsPage(),
     ];
 
     return Scaffold(
@@ -65,14 +65,14 @@ class _MainShellState extends State<MainShell> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
-                color: const Color(0x7007111F),
+                color: const Color(0xFF07111F).withValues(alpha: 0.44),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.10),
+                  color: Colors.white.withValues(alpha: 0.10),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.30),
+                    color: Colors.black.withValues(alpha: 0.30),
                     blurRadius: 30,
                     offset: const Offset(0, 14),
                   ),
@@ -91,18 +91,18 @@ class _MainShellState extends State<MainShell> {
                   onDestinationSelected: (index) {
                     setState(() => _currentIndex = index);
                   },
-                  destinations: [
-                    _destination(
+                  destinations: const [
+                    _NavDestination(
                       activeIcon: Icons.dashboard_rounded,
                       inactiveIcon: Icons.dashboard_outlined,
                       label: 'Dashboard',
                     ),
-                    _destination(
+                    _NavDestination(
                       activeIcon: Icons.add_chart_rounded,
                       inactiveIcon: Icons.add_chart_outlined,
                       label: 'Add Entry',
                     ),
-                    _destination(
+                    _NavDestination(
                       activeIcon: Icons.settings_rounded,
                       inactiveIcon: Icons.settings_outlined,
                       label: 'Settings',
@@ -116,12 +116,21 @@ class _MainShellState extends State<MainShell> {
       ),
     );
   }
+}
 
-  NavigationDestination _destination({
-    required IconData activeIcon,
-    required IconData inactiveIcon,
-    required String label,
-  }) {
+class _NavDestination extends StatelessWidget {
+  final IconData activeIcon;
+  final IconData inactiveIcon;
+  final String label;
+
+  const _NavDestination({
+    required this.activeIcon,
+    required this.inactiveIcon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return NavigationDestination(
       label: label,
       icon: Padding(
@@ -138,18 +147,18 @@ class _MainShellState extends State<MainShell> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppTheme.primary.withOpacity(0.22),
-              AppTheme.cyan.withOpacity(0.12),
-              AppTheme.violet.withOpacity(0.10),
+              AppTheme.primary.withValues(alpha: 0.22),
+              AppTheme.cyan.withValues(alpha: 0.12),
+              AppTheme.violet.withValues(alpha: 0.10),
             ],
           ),
           border: Border.all(
-            color: Colors.white.withOpacity(0.13),
+            color: Colors.white.withValues(alpha: 0.13),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withOpacity(0.14),
+              color: AppTheme.primary.withValues(alpha: 0.14),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -198,7 +207,7 @@ class _PremiumBackground extends StatelessWidget {
             child: _edgeGlow(
               width: 170,
               height: 170,
-              color: const Color(0xFF38D4FF).withOpacity(0.08),
+              color: const Color(0xFF38D4FF).withValues(alpha: 0.08),
             ),
           ),
           Positioned(
@@ -207,7 +216,7 @@ class _PremiumBackground extends StatelessWidget {
             child: _edgeGlow(
               width: 150,
               height: 150,
-              color: const Color(0xFF775EFF).withOpacity(0.07),
+              color: const Color(0xFF775EFF).withValues(alpha: 0.07),
             ),
           ),
         ],
@@ -240,25 +249,25 @@ class _StructuredBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final subtleLine = Paint()
-      ..color = Colors.white.withOpacity(0.026)
+      ..color = Colors.white.withValues(alpha: 0.026)
       ..strokeWidth = 1;
 
     final faintLine = Paint()
-      ..color = Colors.white.withOpacity(0.014)
+      ..color = Colors.white.withValues(alpha: 0.014)
       ..strokeWidth = 1;
 
     final accentLine = Paint()
-      ..color = const Color(0xFF58CFFF).withOpacity(0.055)
+      ..color = const Color(0xFF58CFFF).withValues(alpha: 0.055)
       ..strokeWidth = 1.15
       ..style = PaintingStyle.stroke;
 
     final topBeam = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Color(0x18FFFFFF),
-          Color(0x00FFFFFF),
+          const Color(0xFFFFFFFF).withValues(alpha: 0.09),
+          const Color(0xFFFFFFFF).withValues(alpha: 0.0),
         ],
       ).createShader(
         Rect.fromLTWH(0, 0, size.width * 0.42, size.height * 0.24),
@@ -274,7 +283,7 @@ class _StructuredBackgroundPainter extends CustomPainter {
     canvas.drawPath(topLeftShape, topBeam);
 
     final rightGlowPaint = Paint()
-      ..color = const Color(0xFF35D4FF).withOpacity(0.028)
+      ..color = const Color(0xFF35D4FF).withValues(alpha: 0.028)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
 
     final rightShape = Path()
@@ -342,7 +351,7 @@ class _StructuredBackgroundPainter extends CustomPainter {
       1.38,
       false,
       Paint()
-        ..color = const Color(0xFF38D5FF).withOpacity(0.042)
+        ..color = const Color(0xFF38D5FF).withValues(alpha: 0.042)
         ..strokeWidth = 1.1
         ..style = PaintingStyle.stroke,
     );
@@ -353,7 +362,7 @@ class _StructuredBackgroundPainter extends CustomPainter {
       1.14,
       false,
       Paint()
-        ..color = const Color(0xFF7A63FF).withOpacity(0.038)
+        ..color = const Color(0xFF7A63FF).withValues(alpha: 0.038)
         ..strokeWidth = 1.15
         ..style = PaintingStyle.stroke,
     );

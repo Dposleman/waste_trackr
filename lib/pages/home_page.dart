@@ -69,10 +69,12 @@ class _HomePageState extends State<HomePage> {
               else if (entries.isEmpty)
                 const _EmptyStateCard()
               else
-                ...entries.take(5).map((entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _EntryCard(entry: entry),
-                    )),
+                ...entries.take(5).map(
+                      (entry) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _EntryCard(entry: entry),
+                      ),
+                    ),
             ],
           );
         },
@@ -170,10 +172,10 @@ class _HeroCard extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 18),
-          Wrap(
+          const Wrap(
             spacing: 10,
             runSpacing: 10,
-            children: const [
+            children: [
               _Tag(label: 'UnderStack UI'),
               _Tag(label: 'Live dashboard'),
               _Tag(label: 'Local storage'),
@@ -413,9 +415,9 @@ class _Tag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: Colors.white.withOpacity(0.06),
+        color: Colors.white.withValues(alpha: 0.06),
         border: Border.all(
-          color: Colors.white.withOpacity(0.09),
+          color: Colors.white.withValues(alpha: 0.09),
         ),
       ),
       child: Text(
