@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
+import '../models/waste_entry.dart';
+import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
 
 class CalculatorPage extends StatefulWidget {
@@ -24,6 +26,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
   String _selectedUnit = 'kg';
   String _selectedReason = 'Spoilage';
   DateTime _selectedDate = DateTime.now();
+  bool _isSaving = false;
 
   static const List<String> _units = [
     'kg',
@@ -59,16 +62,70 @@ class _CalculatorPageState extends State<CalculatorPage> {
   double get _unitCost => double.tryParse(_unitCostController.text) ?? 0;
   double get _totalLoss => _quantity * _unitCost;
 
-  void _savePlaceholder() {
+  Future<void> _saveEntry() async {
     if (!_formKey.currentState!.validate()) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Waste entry UI is ready. Next step: connect SharedPreferences and save real entries.',
+    setState(() => _isSaving = true);
+
+    try {
+      final entry = WasteEntry(
+        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        itemName: _itemController.text.trim(),
+        category: _categoryController.text.trim(),
+        quantity: _quantity,
+        unit: _selectedUnit,
+        unitCost: _unitCost,
+        reason: _selectedReason,
+        date: DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
         ),
-      ),
-    );
+        note: _noteController.text.trim().isEmpty
+            ? null
+            : _noteController.text.trim(),
+        createdAt: DateTime.now(),
+      );
+
+      await WasteStorageService.addEntry(entry);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Entry saved: ${entry.itemName} • € ${entry.totalLoss.toStringAsFixed(2)}',
+          ),
+        ),
+      );
+
+      _resetForm();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save waste entry.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  void _resetForm() {
+    _itemController.clear();
+    _categoryController.clear();
+    _quantityController.text = '1';
+    _unitCostController.text = '0';
+    _noteController.clear();
+
+    setState(() {
+      _selectedUnit = 'kg';
+      _selectedReason = 'Spoilage';
+      _selectedDate = DateTime.now();
+    });
   }
 
   Future<void> _pickDate() async {
@@ -111,7 +168,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'This is the reused entry screen base. It already matches the UnderStack look and is ready to be connected to real waste storage.',
+              'Log wasted ingredients, products, and prep losses to measure real kitchen waste in euros.',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: AppTheme.textMuted,
               ),
@@ -292,8 +349,8 @@ class _CalculatorPageState extends State<CalculatorPage> {
             ),
             const SizedBox(height: 22),
             FilledButton(
-              onPressed: _savePlaceholder,
-              child: const Text('Save entry'),
+              onPressed: _isSaving ? null : _saveEntry,
+              child: Text(_isSaving ? 'Saving...' : 'Save entry'),
             ),
           ],
         ),

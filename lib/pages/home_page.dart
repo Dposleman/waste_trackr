@@ -1,49 +1,154 @@
 import 'package:flutter/material.dart';
 
 import '../app_theme.dart';
+import '../models/waste_entry.dart';
+import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late Future<List<WasteEntry>> _entriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _entriesFuture = WasteStorageService.getEntries();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'WasteTrackr',
-            style: theme.textTheme.headlineLarge,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Track food waste, reduce losses, and build a clean MVP foundation for the next UnderStack utility app.',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: AppTheme.textMuted,
-            ),
-          ),
-          const SizedBox(height: 24),
-          const _HeroCard(),
-          const SizedBox(height: 18),
-          const _SectionTitle(title: 'Overview'),
-          const SizedBox(height: 12),
-          const _StatsGrid(),
-          const SizedBox(height: 18),
-          const _SectionTitle(title: 'What comes next'),
-          const SizedBox(height: 12),
-          const _RoadmapCard(),
-        ],
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: FutureBuilder<List<WasteEntry>>(
+        future: _entriesFuture,
+        builder: (context, snapshot) {
+          final entries = snapshot.data ?? [];
+          final todayTotal = _calculateTodayTotal(entries);
+          final weekTotal = _calculateWeekTotal(entries);
+          final topReason = _topReason(entries);
+          final topItem = _topItem(entries);
+
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+            children: [
+              Text(
+                'WasteTrackr',
+                style: theme.textTheme.headlineLarge,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Track food waste, reduce losses, and build real kitchen visibility.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: AppTheme.textMuted,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _HeroCard(entryCount: entries.length),
+              const SizedBox(height: 18),
+              const _SectionTitle(title: 'Overview'),
+              const SizedBox(height: 12),
+              _StatsGrid(
+                todayTotal: todayTotal,
+                weekTotal: weekTotal,
+                topReason: topReason,
+                topItem: topItem,
+              ),
+              const SizedBox(height: 18),
+              const _SectionTitle(title: 'Latest entries'),
+              const SizedBox(height: 12),
+              if (snapshot.connectionState == ConnectionState.waiting)
+                const _LoadingCard()
+              else if (entries.isEmpty)
+                const _EmptyStateCard()
+              else
+                ...entries.take(5).map((entry) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _EntryCard(entry: entry),
+                    )),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  Future<void> _refresh() async {
+    final freshEntries = await WasteStorageService.getEntries();
+    if (!mounted) return;
+
+    setState(() {
+      _entriesFuture = Future.value(freshEntries);
+    });
+  }
+
+  double _calculateTodayTotal(List<WasteEntry> entries) {
+    final now = DateTime.now();
+
+    return entries
+        .where(
+          (entry) =>
+              entry.date.year == now.year &&
+              entry.date.month == now.month &&
+              entry.date.day == now.day,
+        )
+        .fold(0.0, (sum, entry) => sum + entry.totalLoss);
+  }
+
+  double _calculateWeekTotal(List<WasteEntry> entries) {
+    final now = DateTime.now();
+    final startOfWeek = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 7));
+
+    return entries
+        .where(
+          (entry) =>
+              !entry.date.isBefore(startOfWeek) && entry.date.isBefore(endOfWeek),
+        )
+        .fold(0.0, (sum, entry) => sum + entry.totalLoss);
+  }
+
+  String _topReason(List<WasteEntry> entries) {
+    if (entries.isEmpty) return '—';
+
+    final counts = <String, int>{};
+    for (final entry in entries) {
+      counts[entry.reason] = (counts[entry.reason] ?? 0) + 1;
+    }
+
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sorted.first.key;
+  }
+
+  String _topItem(List<WasteEntry> entries) {
+    if (entries.isEmpty) return '—';
+
+    final totals = <String, double>{};
+    for (final entry in entries) {
+      totals[entry.itemName] = (totals[entry.itemName] ?? 0) + entry.totalLoss;
+    }
+
+    final sorted = totals.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sorted.first.key;
   }
 }
 
 class _HeroCard extends StatelessWidget {
-  const _HeroCard();
+  final int entryCount;
+
+  const _HeroCard({required this.entryCount});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +162,9 @@ class _HeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'This base is now focused on WasteTrackr. The next development pass should wire local storage, add waste entry creation, and connect dashboard metrics to real data.',
+            entryCount == 0
+                ? 'Start by adding your first waste entry. Once you log data, the dashboard will show real loss metrics.'
+                : 'You already have $entryCount waste entr${entryCount == 1 ? 'y' : 'ies'} stored locally.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppTheme.textMuted,
                 ),
@@ -68,8 +175,8 @@ class _HeroCard extends StatelessWidget {
             runSpacing: 10,
             children: const [
               _Tag(label: 'UnderStack UI'),
-              _Tag(label: 'Waste MVP'),
-              _Tag(label: 'Shared base'),
+              _Tag(label: 'Live dashboard'),
+              _Tag(label: 'Local storage'),
             ],
           ),
         ],
@@ -79,47 +186,57 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _StatsGrid extends StatelessWidget {
-  const _StatsGrid();
+  final double todayTotal;
+  final double weekTotal;
+  final String topReason;
+  final String topItem;
+
+  const _StatsGrid({
+    required this.todayTotal,
+    required this.weekTotal,
+    required this.topReason,
+    required this.topItem,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         Row(
           children: [
             Expanded(
               child: _StatCard(
                 title: 'Today',
-                value: '€0.00',
-                subtitle: 'No entries yet',
+                value: '€ ${todayTotal.toStringAsFixed(2)}',
+                subtitle: 'Today loss',
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _StatCard(
                 title: 'This week',
-                value: '€0.00',
-                subtitle: 'Awaiting data',
+                value: '€ ${weekTotal.toStringAsFixed(2)}',
+                subtitle: 'Weekly loss',
               ),
             ),
           ],
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: _StatCard(
                 title: 'Top reason',
-                value: '—',
-                subtitle: 'No data yet',
+                value: topReason,
+                subtitle: 'Most frequent',
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _StatCard(
                 title: 'Top item',
-                value: '—',
-                subtitle: 'No data yet',
+                value: topItem,
+                subtitle: 'Highest total loss',
               ),
             ),
           ],
@@ -175,53 +292,95 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _RoadmapCard extends StatelessWidget {
-  const _RoadmapCard();
+class _EntryCard extends StatelessWidget {
+  final WasteEntry entry;
+
+  const _EntryCard({required this.entry});
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      'Create WasteEntry model',
-      'Add local persistence with SharedPreferences',
-      'Build add-entry flow',
-      'Create history page later',
-      'Connect dashboard metrics to real entries',
-    ];
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  entry.itemName,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Text(
+                '€ ${entry.totalLoss.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppTheme.cyan,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${entry.quantity.toStringAsFixed(2)} ${entry.unit} • ${entry.reason}',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textMuted,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _formatDate(entry.date),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTheme.textSoft,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
 
+  static String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+  }
+}
+
+class _LoadingCard extends StatelessWidget {
+  const _LoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppCard(
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyStateCard extends StatelessWidget {
+  const _EmptyStateCard();
+
+  @override
+  Widget build(BuildContext context) {
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Current migration status',
-            style: Theme.of(context).textTheme.titleMedium,
+            'No entries yet',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-          const SizedBox(height: 14),
-          ...items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.only(top: 6),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.cyan,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      item,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          const SizedBox(height: 10),
+          Text(
+            'Go to Add Entry and save your first waste record to start seeing dashboard metrics.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textMuted,
+                ),
           ),
         ],
       ),
