@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/external_links.dart';
+import '../widgets/premium_cta_card.dart';
 import '../app_theme.dart';
 import '../models/waste_entry.dart';
 import '../services/waste_storage_service.dart';
@@ -440,4 +442,10 @@ class _BreakdownRow extends StatelessWidget {
       ],
     );
   }
+  const PremiumCtaCard(
+  title: 'Turn waste insight into restaurant action',
+  description:
+      'WasteTrackr surfaces the signal. GastroApp is the premium layer for restaurants that want to connect waste visibility with broader kitchen operations and decision-making.',
+),
+const SizedBox(height: 18),
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/premium_cta_card.dart';
 import '../app_theme.dart';
 import '../models/waste_entry.dart';
 import '../services/waste_storage_service.dart';
@@ -65,8 +66,14 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 24),
               _HeroCard(entryCount: entries.length),
-              const SizedBox(height: 18),
-              const _SectionTitle(title: 'Overview'),
+const SizedBox(height: 18),
+const PremiumCtaCard(
+  title: 'Need more than local waste logs?',
+  description:
+      'WasteTrackr is your fast field tool. GastroApp is the premium step when you want deeper kitchen control, centralized workflows and a broader operational system.',
+),
+const SizedBox(height: 18),
+const _SectionTitle(title: 'Overview'),
               const SizedBox(height: 12),
               _StatsGrid(
                 todayTotal: todayTotal,
