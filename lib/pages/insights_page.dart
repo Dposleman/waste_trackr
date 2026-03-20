@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../utils/external_links.dart';
-import '../widgets/premium_cta_card.dart';
 import '../app_theme.dart';
 import '../models/waste_entry.dart';
 import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
+import '../widgets/premium_cta_card.dart';
 
 class InsightsPage extends StatefulWidget {
-  final int refreshToken;
-
   const InsightsPage({
     super.key,
     required this.refreshToken,
   });
+
+  final int refreshToken;
 
   @override
   State<InsightsPage> createState() => _InsightsPageState();
@@ -98,7 +97,7 @@ class _InsightsPageState extends State<InsightsPage> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Add a few waste entries first. Once data exists, this page will show real waste patterns.',
+                        'Add a few waste entries first.\nOnce data exists, this page will show real waste patterns.',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: AppTheme.textMuted,
                         ),
@@ -143,6 +142,12 @@ class _InsightsPageState extends State<InsightsPage> {
                       )
                       .toList(),
                 ),
+                const SizedBox(height: 18),
+                const PremiumCtaCard(
+                  title: 'Turn waste insight into restaurant action',
+                  description:
+                      'WasteTrackr surfaces the signal. GastroApp is the premium layer for restaurants that want to connect waste visibility with broader kitchen operations and decision-making.',
+                ),
               ],
             ],
           );
@@ -152,13 +157,14 @@ class _InsightsPageState extends State<InsightsPage> {
   }
 
   double _totalLoss(List<WasteEntry> entries) {
-    return entries.fold<double>(0.0, (sum, entry) => sum + entry.totalLoss);
+    return entries.fold(0.0, (sum, entry) => sum + entry.totalLoss);
   }
 
   String _topCategory(List<WasteEntry> entries) {
     if (entries.isEmpty) return '—';
 
     final totals = <String, double>{};
+
     for (final entry in entries) {
       final key = entry.category.trim().isEmpty ? 'Uncategorized' : entry.category;
       totals[key] = (totals[key] ?? 0) + entry.totalLoss;
@@ -174,6 +180,7 @@ class _InsightsPageState extends State<InsightsPage> {
     if (entries.isEmpty) return '—';
 
     final counts = <String, int>{};
+
     for (final entry in entries) {
       counts[entry.reason] = (counts[entry.reason] ?? 0) + 1;
     }
@@ -188,6 +195,7 @@ class _InsightsPageState extends State<InsightsPage> {
     if (entries.isEmpty) return '—';
 
     final totals = <String, double>{};
+
     for (final entry in entries) {
       totals[entry.itemName] = (totals[entry.itemName] ?? 0) + entry.totalLoss;
     }
@@ -227,17 +235,17 @@ class _InsightsPageState extends State<InsightsPage> {
 }
 
 class _InsightStatsGrid extends StatelessWidget {
-  final double totalLoss;
-  final double avgLoss;
-  final String topCategory;
-  final String topReason;
-
   const _InsightStatsGrid({
     required this.totalLoss,
     required this.avgLoss,
     required this.topCategory,
     required this.topReason,
   });
+
+  final double totalLoss;
+  final double avgLoss;
+  final String topCategory;
+  final String topReason;
 
   @override
   Widget build(BuildContext context) {
@@ -288,15 +296,15 @@ class _InsightStatsGrid extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
-
   const _StatCard({
     required this.title,
     required this.value,
     required this.subtitle,
   });
+
+  final String title;
+  final String value;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -334,15 +342,15 @@ class _StatCard extends StatelessWidget {
 }
 
 class _HeadlineCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
-
   const _HeadlineCard({
     required this.title,
     required this.value,
     required this.subtitle,
   });
+
+  final String title;
+  final String value;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -376,13 +384,13 @@ class _HeadlineCard extends StatelessWidget {
 }
 
 class _BreakdownCard extends StatelessWidget {
-  final String title;
-  final List<_BreakdownRowData> items;
-
   const _BreakdownCard({
     required this.title,
     required this.items,
   });
+
+  final String title;
+  final List<_BreakdownRowData> items;
 
   @override
   Widget build(BuildContext context) {
@@ -408,19 +416,19 @@ class _BreakdownCard extends StatelessWidget {
 }
 
 class _BreakdownRowData {
-  final String label;
-  final String value;
-
   const _BreakdownRowData({
     required this.label,
     required this.value,
   });
+
+  final String label;
+  final String value;
 }
 
 class _BreakdownRow extends StatelessWidget {
-  final _BreakdownRowData item;
-
   const _BreakdownRow({required this.item});
+
+  final _BreakdownRowData item;
 
   @override
   Widget build(BuildContext context) {
@@ -442,10 +450,4 @@ class _BreakdownRow extends StatelessWidget {
       ],
     );
   }
-  const PremiumCtaCard(
-  title: 'Turn waste insight into restaurant action',
-  description:
-      'WasteTrackr surfaces the signal. GastroApp is the premium layer for restaurants that want to connect waste visibility with broader kitchen operations and decision-making.',
-),
-const SizedBox(height: 18),
 }

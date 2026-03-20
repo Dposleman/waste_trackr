@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/premium_cta_card.dart';
 import '../app_theme.dart';
 import '../models/waste_entry.dart';
 import '../services/waste_storage_service.dart';
 import '../widgets/app_card.dart';
+import '../widgets/premium_cta_card.dart';
 
 class HomePage extends StatefulWidget {
-  final int refreshToken;
-
   const HomePage({
     super.key,
     required this.refreshToken,
   });
+
+  final int refreshToken;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -33,6 +33,15 @@ class _HomePageState extends State<HomePage> {
     if (oldWidget.refreshToken != widget.refreshToken) {
       _entriesFuture = WasteStorageService.getEntries();
     }
+  }
+
+  Future<void> _refresh() async {
+    final freshEntries = await WasteStorageService.getEntries();
+    if (!mounted) return;
+
+    setState(() {
+      _entriesFuture = Future.value(freshEntries);
+    });
   }
 
   @override
@@ -66,14 +75,14 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 24),
               _HeroCard(entryCount: entries.length),
-const SizedBox(height: 18),
-const PremiumCtaCard(
-  title: 'Need more than local waste logs?',
-  description:
-      'WasteTrackr is your fast field tool. GastroApp is the premium step when you want deeper kitchen control, centralized workflows and a broader operational system.',
-),
-const SizedBox(height: 18),
-const _SectionTitle(title: 'Overview'),
+              const SizedBox(height: 18),
+              const PremiumCtaCard(
+                title: 'Need more than local waste logs?',
+                description:
+                    'WasteTrackr is your fast field tool. GastroApp is the premium step when you want deeper kitchen control, centralized workflows and a broader operational system.',
+              ),
+              const SizedBox(height: 18),
+              const _SectionTitle(title: 'Overview'),
               const SizedBox(height: 12),
               _StatsGrid(
                 todayTotal: todayTotal,
@@ -90,25 +99,16 @@ const _SectionTitle(title: 'Overview'),
                 const _EmptyStateCard()
               else
                 ...entries.take(5).map(
-                      (entry) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _EntryCard(entry: entry),
-                      ),
-                    ),
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _EntryCard(entry: entry),
+                  ),
+                ),
             ],
           );
         },
       ),
     );
-  }
-
-  Future<void> _refresh() async {
-    final freshEntries = await WasteStorageService.getEntries();
-    if (!mounted) return;
-
-    setState(() {
-      _entriesFuture = Future.value(freshEntries);
-    });
   }
 
   double _calculateTodayTotal(List<WasteEntry> entries) {
@@ -142,6 +142,7 @@ const _SectionTitle(title: 'Overview'),
     if (entries.isEmpty) return '—';
 
     final counts = <String, int>{};
+
     for (final entry in entries) {
       counts[entry.reason] = (counts[entry.reason] ?? 0) + 1;
     }
@@ -156,6 +157,7 @@ const _SectionTitle(title: 'Overview'),
     if (entries.isEmpty) return '—';
 
     final totals = <String, double>{};
+
     for (final entry in entries) {
       totals[entry.itemName] = (totals[entry.itemName] ?? 0) + entry.totalLoss;
     }
@@ -168,9 +170,9 @@ const _SectionTitle(title: 'Overview'),
 }
 
 class _HeroCard extends StatelessWidget {
-  final int entryCount;
-
   const _HeroCard({required this.entryCount});
+
+  final int entryCount;
 
   @override
   Widget build(BuildContext context) {
@@ -185,21 +187,12 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             entryCount == 0
-                ? 'Start by adding your first waste entry. Once you log data, the dashboard will show real loss metrics.'
-                : 'You already have $entryCount waste entr${entryCount == 1 ? 'y' : 'ies'} stored locally.',
+                ? 'Start by adding your first waste entry. Build a clean log of what is being lost and why.'
+                : 'You have $entryCount saved waste entr${entryCount == 1 ? 'y' : 'ies'}. Keep logging consistently to spot patterns faster.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppTheme.textMuted,
+                  height: 1.45,
                 ),
-          ),
-          const SizedBox(height: 18),
-          const Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _Tag(label: 'UnderStack UI'),
-              _Tag(label: 'Live dashboard'),
-              _Tag(label: 'Local storage'),
-            ],
           ),
         ],
       ),
@@ -207,18 +200,34 @@ class _HeroCard extends StatelessWidget {
   }
 }
 
-class _StatsGrid extends StatelessWidget {
-  final double todayTotal;
-  final double weekTotal;
-  final String topReason;
-  final String topItem;
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
 
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+    );
+  }
+}
+
+class _StatsGrid extends StatelessWidget {
   const _StatsGrid({
     required this.todayTotal,
     required this.weekTotal,
     required this.topReason,
     required this.topItem,
   });
+
+  final double todayTotal;
+  final double weekTotal;
+  final String topReason;
+  final String topItem;
 
   @override
   Widget build(BuildContext context) {
@@ -238,7 +247,7 @@ class _StatsGrid extends StatelessWidget {
               child: _StatCard(
                 title: 'This week',
                 value: '€ ${weekTotal.toStringAsFixed(2)}',
-                subtitle: 'Weekly loss',
+                subtitle: 'Week loss',
               ),
             ),
           ],
@@ -250,7 +259,7 @@ class _StatsGrid extends StatelessWidget {
               child: _StatCard(
                 title: 'Top reason',
                 value: topReason,
-                subtitle: 'Most frequent',
+                subtitle: 'Most frequent cause',
               ),
             ),
             const SizedBox(width: 12),
@@ -258,7 +267,7 @@ class _StatsGrid extends StatelessWidget {
               child: _StatCard(
                 title: 'Top item',
                 value: topItem,
-                subtitle: 'Highest total loss',
+                subtitle: 'Highest loss item',
               ),
             ),
           ],
@@ -269,21 +278,21 @@ class _StatsGrid extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
-
   const _StatCard({
     required this.title,
     required this.value,
     required this.subtitle,
   });
 
+  final String title;
+  final String value;
+  final String subtitle;
+
   @override
   Widget build(BuildContext context) {
     return AppCard(
       child: SizedBox(
-        height: 128,
+        height: 132,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -311,60 +320,6 @@ class _StatCard extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _EntryCard extends StatelessWidget {
-  final WasteEntry entry;
-
-  const _EntryCard({required this.entry});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  entry.itemName,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Text(
-                '€ ${entry.totalLoss.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppTheme.cyan,
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${entry.quantity.toStringAsFixed(2)} ${entry.unit} • ${entry.reason}',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textMuted,
-                ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            _formatDate(entry.date),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSoft,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
   }
 }
 
@@ -399,7 +354,7 @@ class _EmptyStateCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Go to Add Entry and save your first waste record to start seeing dashboard metrics.',
+            'Add your first waste record to populate the dashboard and start seeing useful patterns.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppTheme.textMuted,
                 ),
@@ -410,40 +365,75 @@ class _EmptyStateCard extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
+class _EntryCard extends StatelessWidget {
+  const _EntryCard({required this.entry});
 
-  const _SectionTitle({required this.title});
+  final WasteEntry entry;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge,
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            entry.itemName,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _Pill(label: entry.category.trim().isEmpty ? 'Uncategorized' : entry.category),
+              _Pill(label: entry.reason),
+              _Pill(label: _formatDate(entry.date)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '€ ${entry.totalLoss.toStringAsFixed(2)}',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppTheme.cyan,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ],
+      ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    return '$day/$month/$year';
   }
 }
 
-class _Tag extends StatelessWidget {
-  final String label;
+class _Pill extends StatelessWidget {
+  const _Pill({required this.label});
 
-  const _Tag({required this.label});
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: Colors.white.withValues(alpha: 0.06),
+        color: Colors.white.withValues(alpha: 0.05),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.09),
+          color: Colors.white.withValues(alpha: 0.08),
         ),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.textPrimary,
+              color: AppTheme.textSoft,
+              fontWeight: FontWeight.w700,
             ),
       ),
     );

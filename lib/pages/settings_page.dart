@@ -29,7 +29,6 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,9 +49,7 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 18),
-
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,17 +68,13 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 18),
-
           const PremiumCtaCard(
             title: 'Ready for the premium layer?',
             description:
                 'WasteTrackr is designed as a focused utility app. GastroApp is the next step for restaurants that want broader kitchen operations, stronger workflows and a more complete product ecosystem.',
           ),
-
           const SizedBox(height: 18),
-
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,9 +143,7 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 18),
-
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

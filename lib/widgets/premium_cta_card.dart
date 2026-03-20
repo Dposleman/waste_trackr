@@ -81,20 +81,23 @@ class PremiumCtaCard extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: const [
                     _FeatureRow(
                       icon: Icons.analytics_outlined,
-                      text: 'Track waste trends across service, station and category',
+                      text:
+                          'Track waste trends across service, station and category',
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     _FeatureRow(
                       icon: Icons.auto_awesome_outlined,
-                      text: 'Move from raw waste logs to operational restaurant intelligence',
+                      text:
+                          'Move from raw waste logs to operational restaurant intelligence',
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
                     _FeatureRow(
                       icon: Icons.storefront_outlined,
-                      text: 'Built for kitchens that outgrow simple local-only utility tools',
+                      text:
+                          'Built for kitchens that outgrow simple local-only utility tools',
                     ),
                   ],
                 ),
