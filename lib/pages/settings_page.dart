@@ -23,12 +23,13 @@ class SettingsPage extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'WasteTrackr product info, ecosystem links and current MVP implementation status.',
+            'WasteTrackr product info, ecosystem links and core app status.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: AppTheme.textMuted,
             ),
           ),
           const SizedBox(height: 24),
+
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +50,9 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(height: 18),
+
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,13 +71,17 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(height: 18),
+
           const PremiumCtaCard(
             title: 'Ready for the premium layer?',
             description:
                 'WasteTrackr is designed as a focused utility app. GastroApp is the next step for restaurants that want broader kitchen operations, stronger workflows and a more complete product ecosystem.',
           ),
+
           const SizedBox(height: 18),
+
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,24 +147,6 @@ class SettingsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Next release block',
-                  style: theme.textTheme.titleLarge,
-                ),
-                const SizedBox(height: 14),
-                const _ChecklistItem(text: 'Packaging polish'),
-                const _ChecklistItem(text: 'App icon and store screenshots'),
-                const _ChecklistItem(text: 'Store listing copy'),
-                const _ChecklistItem(text: 'Release configuration'),
-                const _ChecklistItem(text: 'Play Store publish flow'),
               ],
             ),
           ),
